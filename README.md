@@ -5,10 +5,10 @@ To start the application, please follow the steps below:
 1. Make sure you have Docker and Go installed on your system.
 
 2. Clone the repository:
-   https://github.com/khodza/Golang-Rest-API
+   https://github.com/khodza/EduMatch
 
 3. Change to the project directory:
-   cd Golang-Rest-API
+   cd EduMatch
 
 4. Run the following commands in the terminal:
    make compose-up
@@ -23,5 +23,3 @@ The above commands will set up the necessary dependencies, run any required migr
 5. Open your web browser and visit `http://localhost:8080` to access the application.
 
 Please note that if you encounter any issues during the setup process, make sure to check the project documentation or seek assistance from the project maintainers.
-
-API docs: https://documenter.getpostman.com/view/22439880/2s93z6ejPQ
