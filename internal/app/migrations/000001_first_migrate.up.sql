@@ -20,7 +20,7 @@ CREATE TABLE "users" (
     "avatar" varchar(255),
     "contact_id" uuid REFERENCES "contacts" ("id"),
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    "updated_at" TIMESTAMP
 );
 
 CREATE TABLE "edu_centers" (
@@ -32,7 +32,7 @@ CREATE TABLE "edu_centers" (
     "owner_id" uuid REFERENCES "users" ("id"),
     "contact_id" uuid REFERENCES "contacts" ("id"),
     "image_url" varchar(250),
-    "created_at" timestamp,
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "updated_at" timestamp
 );
 
@@ -42,8 +42,9 @@ CREATE TABLE "courses" (
     "description" text,
     "teacher" varchar(255),
     "edu_center_id" uuid REFERENCES "edu_centers" ("id"),
-    "created_at" timestamp,
-    "updated_at" timestamp
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamp,
+    "deleted_at" timestamp
 );
 
 CREATE TABLE "edu_center_images" (

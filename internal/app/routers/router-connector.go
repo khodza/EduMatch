@@ -19,6 +19,10 @@ func ConnectRoutersToHandlers(router *gin.Engine, handlersMap map[string]interfa
 		case "auth":
 			authHandler := handler.(handlers.AuthHandlerInterface)
 			SetupAuthRouter(routeGroup, authHandler)
+		case "course":
+			courseHandler := handler.(handlers.CourseHandlerInterface)
+			SetupCourseRouter(routeGroup, courseHandler)
 		}
+
 	}
 }
