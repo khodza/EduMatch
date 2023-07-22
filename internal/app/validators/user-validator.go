@@ -9,7 +9,7 @@ import (
 )
 
 type UserValidatorInterface interface {
-	ValidateUserCreate(user *models.User) error
+	ValidateUserCreate(user *models.RegUser) error
 	ValidateUserUpdate(user *models.User) error
 }
 
@@ -23,7 +23,7 @@ func NewUserValidator() UserValidatorInterface {
 	}
 }
 
-func (v *UserValidator) ValidateUserCreate(user *models.User) error {
+func (v *UserValidator) ValidateUserCreate(user *models.RegUser) error {
 	err := v.validate.Struct(user)
 	if err != nil {
 		var validationErrors []string

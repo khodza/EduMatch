@@ -13,16 +13,29 @@ import (
 	"go.uber.org/zap"
 )
 
-func InitDependencies() (*custom_errors.GlobalErrorHandler, map[string]interface{}, *zap.Logger, error) {
+type Handlers struct {
+	UserHandler      *handlers.UserHandler
+	EduCenterHandler handlers.EduCenterHandlerInterface
+	AuthHandler      handlers.AuthHandlerInterface
+}
+
+// Application struct holds references to all the handlers.
+type Application struct {
+	GlobalErrorHandler *custom_errors.GlobalErrorHandler
+	Handlers           Handlers
+	Logger             *zap.Logger
+}
+
+func InitDependencies() (*Application, error) {
 	// INITIALIZE LOGGER
 	logger, err := logger.CreateLogger()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("error on initializing logger")
+		return &Application{}, fmt.Errorf("error on initializing logger")
 	}
 	// Get the DB instance
 	db := database.GetDB()
 	if db == nil {
-		return nil, nil, nil, fmt.Errorf("error on getting db instance")
+		return &Application{}, fmt.Errorf("error on getting db instance")
 	}
 
 	// INITIALIZE REPOSITORIES
@@ -46,11 +59,14 @@ func InitDependencies() (*custom_errors.GlobalErrorHandler, map[string]interface
 	//INITIALIZE Global Error Handler
 	globalErrorHandler := custom_errors.NewGlobalErrorHandler(logger)
 
-	handlersMap := map[string]interface{}{
-		"users":      userHandler,
-		"eduCenters": eduCenterHandler,
-		"auth":       authHandler,
+	app := &Application{
+		GlobalErrorHandler: globalErrorHandler,
+		Handlers: Handlers{
+			AuthHandler:      authHandler,
+			EduCenterHandler: eduCenterHandler,
+			UserHandler:      userHandler,
+		},
+		Logger: logger,
 	}
-
-	return globalErrorHandler, handlersMap, logger, nil
+	return app, nil
 }

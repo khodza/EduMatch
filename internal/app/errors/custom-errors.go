@@ -17,6 +17,7 @@ var CustomErrors = map[string]int{
 	ErrEmailExist.Error():    http.StatusBadRequest,
 	ErrUserNotFound.Error():  http.StatusNotFound,
 	ErrWrongPassword.Error(): http.StatusBadRequest,
+	ErrInvalidToken.Error():  http.StatusUnauthorized,
 }
 
 // utils errors
@@ -32,6 +33,12 @@ var ErrEduCenterNotFound = errors.New("education center not found")
 var ErrEmailExist = errors.New("email already exists")
 var ErrUserNotFound = errors.New("user not found")
 var ErrWrongPassword = errors.New("wrong password provided")
+
+//auth errors
+
+var (
+	ErrInvalidToken = errors.New("invalid token")
+)
 
 // validation(not handles as usual errors)
 var ErrValidation = errors.New("validation failed")

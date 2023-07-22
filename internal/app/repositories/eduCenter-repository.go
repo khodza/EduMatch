@@ -103,12 +103,6 @@ func (r *EduCenterRepository) UpdateEduCenter(eduCenterID uuid.UUID, eduCenter m
 		paramCount++
 	}
 
-	if eduCenter.ContactID != uuid.Nil {
-		updateQuery += fmt.Sprintf(" contact_id = $%d,", paramCount)
-		params = append(params, eduCenter.ContactID)
-		paramCount++
-	}
-
 	if eduCenter.CoverImage != "" {
 		updateQuery += fmt.Sprintf(" cover_image = $%d,", paramCount)
 		params = append(params, eduCenter.CoverImage)

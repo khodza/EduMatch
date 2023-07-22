@@ -10,7 +10,7 @@ import (
 
 type UserServiceInterface interface {
 	GetUsers() ([]models.User, error)
-	CreateUser(user models.User) (models.User, error)
+	CreateUser(user models.RegUser) (models.User, error)
 	GetUser(userID uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
@@ -39,7 +39,7 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) CreateUser(user models.User) (models.User, error) {
+func (s *UserService) CreateUser(user models.RegUser) (models.User, error) {
 	//validation
 	if err := s.validator.ValidateUserCreate(&user); err != nil {
 		return models.User{}, err

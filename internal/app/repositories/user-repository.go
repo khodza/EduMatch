@@ -14,7 +14,7 @@ import (
 
 type UserRepositoryInterface interface {
 	GetUsers() ([]models.User, error)
-	CreateUser(user models.User) (models.User, error)
+	CreateUser(user models.RegUser) (models.User, error)
 	GetUser(userID uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
@@ -41,11 +41,11 @@ func (r *UserRepository) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// eduCenteriD,rating
-func (r *UserRepository) CreateUser(user models.User) (models.User, error) {
-	query := "INSERT INTO users (first_name, last_name, email, username, password, role, avatar) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"
+// eduCenterID,rating
+func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
+	query := "INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING first_name, last_name, username, password"
 	var createdUser models.User
-	err := r.db.Get(&createdUser, query, user.FirstName, user.LastName, user.Email, user.Username, user.Password, user.Role, user.Avatar)
+	err := r.db.Get(&createdUser, query, user.FirstName, user.LastName, user.UserName, user.Password)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			err = custom_errors.ErrEmailExist
@@ -57,7 +57,7 @@ func (r *UserRepository) CreateUser(user models.User) (models.User, error) {
 
 func (r *UserRepository) GetUser(userID uuid.UUID) (models.User, error) {
 	var user models.User
-	query := "SELECT * FROM users WHERE id = $1"
+	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role FROM users WHERE id = $1"
 	err := r.db.Get(&user, query, userID)
 	if err != nil {
 		//not found
@@ -85,7 +85,7 @@ func (r *UserRepository) GetUserByEmail(email string) (models.User, error) {
 
 func (r *UserRepository) GetUserByUsername(username string) (models.User, error) {
 	var user models.User
-	query := "SELECT * FROM users WHERE username = $1"
+	query := "SELECT id,first_name,last_name,COALESCE(email, '') as email,username,password,role FROM users WHERE username = $1"
 	err := r.db.Get(&user, query, username)
 	if err != nil {
 		//not found
@@ -108,6 +108,7 @@ func (r *UserRepository) UpdateUser(userID uuid.UUID, user models.User) (models.
 		params = append(params, user.FirstName)
 		paramCount++
 	}
+
 	if user.LastName != "" {
 		updateQuery += fmt.Sprintf(" last_name = $%d,", paramCount)
 		params = append(params, user.LastName)
@@ -141,12 +142,6 @@ func (r *UserRepository) UpdateUser(userID uuid.UUID, user models.User) (models.
 	if user.Avatar != "" {
 		updateQuery += fmt.Sprintf(" avatar = $%d,", paramCount)
 		params = append(params, user.Avatar)
-		paramCount++
-	}
-
-	if user.ContactID != uuid.Nil {
-		updateQuery += fmt.Sprintf(" contact_id = $%d,", paramCount)
-		params = append(params, user.ContactID)
 		paramCount++
 	}
 

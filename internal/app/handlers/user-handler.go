@@ -11,6 +11,14 @@ import (
 
 type UserHandlerInterface interface {
 	GetUsers(c *gin.Context)
+	// @Summary Get a user by ID
+	// @Description Get a user's details by their ID
+	// @ID get-user-by-id
+	// @Produce json
+	// @Param id path int true "User ID"
+	// @Success 200 {object} UserResponse
+	// @Failure 400 {object} ErrorResponse
+	// @Router /users/{id} [get]
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
@@ -21,7 +29,7 @@ type UserHandler struct {
 	logger      *zap.Logger
 }
 
-func NewUserHandler(userService services.UserServiceInterface, logger *zap.Logger) UserHandlerInterface {
+func NewUserHandler(userService services.UserServiceInterface, logger *zap.Logger) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 		logger:      logger,
@@ -42,6 +50,17 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// @BasePath /api/
+
+// PingExample godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /example/helloworld [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	userID, err := GetId(c, h.logger)
 	if err != nil {
@@ -104,21 +123,21 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 //NOT USED HANDLERS
 
-func (h *UserHandler) CreateUser(c *gin.Context) {
-	var user models.User
-	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
-		return
-	}
+// func (h *UserHandler) CreateUser(c *gin.Context) {
+// 	var user models.User
+// 	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
+// 		return
+// 	}
 
-	createdUser, err := h.userService.CreateUser(user)
+// 	createdUser, err := h.userService.CreateUser(user)
 
-	if err != nil {
-		c.Error(err)
-		return
-	}
+// 	if err != nil {
+// 		c.Error(err)
+// 		return
+// 	}
 
-	//logging
-	LoggingResponse(c, "CreateUser", h.logger)
+// 	//logging
+// 	LoggingResponse(c, "CreateUser", h.logger)
 
-	c.JSON(http.StatusCreated, createdUser)
-}
+// 	c.JSON(http.StatusCreated, createdUser)
+// }
