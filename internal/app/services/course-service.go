@@ -3,12 +3,14 @@ package services
 import (
 	"edumatch/internal/app/models"
 	"edumatch/internal/app/repositories"
+
+	"github.com/google/uuid"
 )
 
 type CourseServiceInterface interface {
 	CreateCourse(course models.Course) (models.Course, error)
 	UpdateCourse(newCourse models.Course) (models.Course, error)
-	GetCourse(id string) (models.Course, error)
+	GetCourse(id uuid.UUID) (models.Course, error)
 	GetAllCourses() ([]models.Course, error)
 	DeleteCourse(id string) error
 }
@@ -39,7 +41,7 @@ func (s *CourseService) UpdateCourse(newCourse models.Course) (models.Course, er
 	return course, nil
 }
 
-func (s *CourseService) GetCourse(id string) (models.Course, error) {
+func (s *CourseService) GetCourse(id uuid.UUID) (models.Course, error) {
 	course, err := s.courseRepository.GetCourse(id)
 	if err != nil {
 		return models.Course{}, err

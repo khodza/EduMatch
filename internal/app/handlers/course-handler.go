@@ -3,7 +3,6 @@ package handlers
 import (
 	"edumatch/internal/app/models"
 	"edumatch/internal/app/services"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,6 @@ type CourseHandlerInterface interface {
 	GetCourse(c *gin.Context)
 	GetAllCourses(c *gin.Context)
 	DeleteCourse(c *gin.Context)
-	// CreateUser(c *gin.Context)
 }
 type CourseHandler struct {
 	courseService services.CourseServiceInterface
@@ -66,9 +64,9 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 }
 
 func (h *CourseHandler) GetCourse(c *gin.Context) {
-	id := c.Param("id")
-	fmt.Println(id)
-	course, err := h.courseService.GetCourse(id)
+	courseID, err := GetId(c, h.logger)
+
+	course, err := h.courseService.GetCourse(courseID)
 	if err != nil {
 		c.Error(err)
 		return

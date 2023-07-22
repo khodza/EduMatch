@@ -41,8 +41,7 @@ var ErrWrongPassword = errors.New("wrong password provided")
 var ErrCourseNotFound = errors.New("course not found")
 var ErrCourseExists = errors.New("course is exists")
 
-//auth errors
-
+// auth errors
 var (
 	ErrInvalidToken = errors.New("invalid token")
 )
