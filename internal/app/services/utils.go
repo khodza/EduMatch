@@ -1,6 +1,7 @@
 package services
 
 import (
+	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/config"
 	"errors"
 	"strconv"
@@ -64,24 +65,31 @@ func ValidateToken(tokenString string) (uuid.UUID, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method used
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid token")
+			return nil, custom_errors.ErrInvalidToken
 		}
 		secretKey := config.GetEnv("JWT_SECRET", "nothing")
 		return []byte(secretKey), nil
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, custom_errors.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
+
 	if !ok || !token.Valid {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, custom_errors.ErrInvalidToken
 	}
 
-	userID, ok := claims["user_id"].(uuid.UUID)
+	// Extract and validate the "user_id" claim
+	userIDStr, ok := claims["user_id"].(string)
 	if !ok {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, custom_errors.ErrInvalidToken
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return uuid.Nil, custom_errors.ErrInvalidToken
 	}
 
 	return userID, nil
@@ -116,7 +124,7 @@ func ValidateRefreshToken(tokenString string) (uuid.UUID, error) {
 	return userID, nil
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func CheckPassword(hashedPassword, plainPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 	return err == nil
 }

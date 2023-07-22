@@ -11,7 +11,6 @@ type Role string
 const (
 	AdminRole Role = "Admin"
 	UserRole  Role = "User"
-	Teacher   Role = "Teacher"
 )
 
 type User struct {
@@ -23,7 +22,6 @@ type User struct {
 	Password  string    `json:"password" db:"password" validate:"required,min=8,max=16"`
 	Role      Role      `json:"role" db:"role"`
 	Avatar    string    `json:"avatar" db:"avatar"`
-	ContactID uuid.UUID `json:"contact_id" db:"contact_id"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

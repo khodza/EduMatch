@@ -6,7 +6,7 @@ import (
 )
 
 type AuthServiceInterface interface {
-	RegisterUser(user models.User) (models.Tokens, error)
+	RegisterUser(user models.RegUser) (models.Tokens, error)
 	Login(models.LoggingUser) (models.Tokens, error)
 }
 
@@ -20,7 +20,7 @@ func NewAuthService(userService UserServiceInterface) AuthServiceInterface {
 	}
 }
 
-func (s *AuthService) RegisterUser(user models.User) (models.Tokens, error) {
+func (s *AuthService) RegisterUser(user models.RegUser) (models.Tokens, error) {
 	// create a new user
 	createdUser, err := s.userService.CreateUser(user)
 	if err != nil {
@@ -52,9 +52,8 @@ func (s *AuthService) Login(loggingUser models.LoggingUser) (models.Tokens, erro
 	if err != nil {
 		return models.Tokens{}, err
 	}
-
 	//check password
-	if !CheckPasswordHash(user.Password, loggingUser.Password) {
+	if !CheckPassword(user.Password, loggingUser.Password) {
 		return models.Tokens{}, custom_errors.ErrWrongPassword
 	}
 
