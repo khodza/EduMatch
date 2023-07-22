@@ -17,6 +17,7 @@ type Handlers struct {
 	UserHandler      *handlers.UserHandler
 	EduCenterHandler handlers.EduCenterHandlerInterface
 	AuthHandler      handlers.AuthHandlerInterface
+	CourseHandler    handlers.CourseHandlerInterface
 }
 
 // Application struct holds references to all the handlers.
@@ -41,6 +42,7 @@ func InitDependencies() (*Application, error) {
 	// INITIALIZE REPOSITORIES
 	userRepository := repositories.NewUserRepository(db)
 	eduCenterRepository := repositories.NewEduCenterRepository(db)
+	courseRepasitory := repositories.NewCourseRepository(db)
 
 	//INITIALIZE VALIDATORS
 	userValidator := validators.NewUserValidator()
@@ -50,11 +52,13 @@ func InitDependencies() (*Application, error) {
 	userService := services.NewUserService(userRepository, userValidator)
 	authService := services.NewAuthService(userService)
 	eduCenterService := services.NewEduCenterService(eduCenterRepository, eduCenterValidator)
+	courseService := services.NewCourseService(courseRepasitory)
 
 	// INITIALIZE HANDLERS
 	userHandler := handlers.NewUserHandler(userService, logger)
 	eduCenterHandler := handlers.NewEduCenterHandler(eduCenterService, logger)
 	authHandler := handlers.NewAuthHandler(authService, logger)
+	courseHandler := handlers.NewCourseHandler(courseService, logger)
 
 	//INITIALIZE Global Error Handler
 	globalErrorHandler := custom_errors.NewGlobalErrorHandler(logger)
@@ -65,6 +69,7 @@ func InitDependencies() (*Application, error) {
 			AuthHandler:      authHandler,
 			EduCenterHandler: eduCenterHandler,
 			UserHandler:      userHandler,
+			CourseHandler:    courseHandler,
 		},
 		Logger: logger,
 	}

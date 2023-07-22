@@ -29,5 +29,12 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.PATCH("educenters/:id", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.UpdateEduCenter)
 	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.DeleteEduCenter)
 
+	//courses
+	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.CreateCourse)
+	api.GET("/courses/:id", h.CourseHandler.GetCourse)
+	api.GET("/courses/", h.CourseHandler.GetAllCourses)
+	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.UpdateCourse)
+	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.DeleteCourse)
+
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
