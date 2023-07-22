@@ -7,6 +7,10 @@ import (
 
 type CourseServiceInterface interface {
 	CreateCourse(course models.Course) (models.Course, error)
+	UpdateCourse(newCourse models.Course) (models.Course, error)
+	GetCourse(id string) (models.Course, error)
+	GetAllCourses() ([]models.Course, error)
+	DeleteCourse(id string) error
 }
 
 type CourseService struct {
@@ -25,4 +29,35 @@ func (s *CourseService) CreateCourse(course models.Course) (models.Course, error
 		return models.Course{}, err
 	}
 	return newCourse, nil
+}
+
+func (s *CourseService) UpdateCourse(newCourse models.Course) (models.Course, error) {
+	course, err := s.courseRepository.UpdateCourse(newCourse)
+	if err != nil {
+		return models.Course{}, err
+	}
+	return course, nil
+}
+
+func (s *CourseService) GetCourse(id string) (models.Course, error) {
+	course, err := s.courseRepository.GetCourse(id)
+	if err != nil {
+		return models.Course{}, err
+	}
+	return course, nil
+}
+
+func (s *CourseService) GetAllCourses() ([]models.Course, error) {
+	courses, err := s.courseRepository.GetAllCourses()
+	if err != nil {
+		return nil, err
+	}
+	return courses, nil
+}
+
+func (s *CourseService) DeleteCourse(id string) error {
+	if err := s.courseRepository.DeleteCourse(id); err != nil {
+		return err
+	}
+	return nil
 }

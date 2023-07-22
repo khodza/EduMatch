@@ -9,7 +9,7 @@ type Course struct {
 	Name        string    `json:"name" db:"name"`
 	Description string    `json:"description" db:"description"`
 	Teacher     string    `json:"teacher" db:"teacher"`
-	EduCenterID int       `json:"edu_center_id" db:"edu_center_id"`
+	EduCenterID string    `json:"edu_center_id" db:"edu_center_id"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -19,7 +19,7 @@ type CourseRes struct {
 	Name        string `json:"name" db:"name"`
 	Description string `json:"description" db:"description"`
 	Teacher     string `json:"teacher" db:"teacher"`
-	EduCenterID int    `json:"edu_center_id" db:"edu_center_id"`
+	EduCenterID string `json:"edu_center_id" db:"edu_center_id"`
 	Rating      float64
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
