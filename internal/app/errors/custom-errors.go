@@ -14,7 +14,7 @@ var CustomErrors = map[string]int{
 	ErrEduCenterExist.Error():    http.StatusBadRequest,
 	ErrEduCenterNotFound.Error(): http.StatusNotFound,
 	// users errors
-	ErrEmailExist.Error():    http.StatusBadRequest,
+	ErrUserExist.Error():     http.StatusBadRequest,
 	ErrUserNotFound.Error():  http.StatusNotFound,
 	ErrWrongPassword.Error(): http.StatusBadRequest,
 	// course errors
@@ -33,7 +33,7 @@ var ErrEduCenterExist = errors.New("education center already exist")
 var ErrEduCenterNotFound = errors.New("education center not found")
 
 // users errors
-var ErrEmailExist = errors.New("email already exists")
+var ErrUserExist = errors.New("user with this username or email already exists")
 var ErrUserNotFound = errors.New("user not found")
 var ErrWrongPassword = errors.New("wrong password provided")
 

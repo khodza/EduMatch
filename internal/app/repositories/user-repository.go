@@ -41,14 +41,14 @@ func (r *UserRepository) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// eduCenterID,rating
 func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
 	query := "INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING first_name, last_name, username, password"
 	var createdUser models.User
 	err := r.db.Get(&createdUser, query, user.FirstName, user.LastName, user.UserName, user.Password)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			err = custom_errors.ErrEmailExist
+			fmt.Println(err)
+			err = custom_errors.ErrUserExist
 		}
 		return models.User{}, err
 	}
@@ -170,7 +170,7 @@ func (r *UserRepository) UpdateUser(userID uuid.UUID, user models.User) (models.
 		//duplicate error
 		pqErr, _ := err.(*pq.Error)
 		if pqErr.Code == "23505" {
-			err = custom_errors.ErrEmailExist
+			err = custom_errors.ErrUserExist
 		}
 		//not found
 		if err == sql.ErrNoRows {

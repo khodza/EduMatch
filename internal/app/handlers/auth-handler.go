@@ -113,6 +113,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	// Validate the refresh token
 	userID, userRole, err := services.ValidateRefreshToken(refreshToken)
 	if err != nil {
+
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
 		return
 	}
