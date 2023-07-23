@@ -2,6 +2,7 @@ package routers
 
 import (
 	"edumatch/cmd/docs"
+	"edumatch/internal/app/models"
 	"edumatch/internal/dependencies"
 
 	"github.com/gin-gonic/gin"
@@ -15,26 +16,27 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	//auth
 	api.POST("/auth/signup", h.AuthHandler.SignUp)
 	api.POST("/auth/login", h.AuthHandler.Login)
+	api.POST("/auth/refresh", h.AuthHandler.RefreshToken)
 
 	//users
-	api.GET("/users/", h.AuthHandler.ProtectedEndpoint, h.UserHandler.GetUsers)
+	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.AdminRole), h.UserHandler.GetUsers)
 	api.GET("/users/:id", h.UserHandler.GetUser)
-	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint, h.UserHandler.UpdateUser)
-	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint, h.UserHandler.DeleteUser)
+	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
+	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 
 	//eduCenters
-	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.CreateEduCenter)
-	api.GET("/educenters/", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.GetEduCenters)
+	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
+	api.GET("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GetEduCenters)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
-	api.PATCH("educenters/:id", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.UpdateEduCenter)
-	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint, h.EduCenterHandler.DeleteEduCenter)
+	api.PATCH("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
+	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
-	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.CreateCourse)
+	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)
 	api.GET("/courses/:id", h.CourseHandler.GetCourse)
 	api.GET("/courses/", h.CourseHandler.GetAllCourses)
-	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.UpdateCourse)
-	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint, h.CourseHandler.DeleteCourse)
+	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
+	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

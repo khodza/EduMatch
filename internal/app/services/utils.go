@@ -2,9 +2,10 @@ package services
 
 import (
 	custom_errors "edumatch/internal/app/errors"
+	"edumatch/internal/app/models"
 	"edumatch/internal/config"
-	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -20,12 +21,13 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), err
 }
 
-func GenerateToken(userID uuid.UUID) (string, error) {
+func GenerateToken(userID uuid.UUID, role models.Role) (string, error) {
 	//  exp time
 	expTime, _ := strconv.Atoi(config.GetEnv("JWT_EXP_TIME", "24"))
 	// Define the claims for the token
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"role":    role,
 		"exp":     time.Now().Add(time.Hour * 24 * time.Duration(expTime)).Unix(),
 	}
 
@@ -40,12 +42,13 @@ func GenerateToken(userID uuid.UUID) (string, error) {
 	return signedToken, nil
 }
 
-func GenerateRefreshToken(userID uuid.UUID) (string, error) {
+func GenerateRefreshToken(userID uuid.UUID, role models.Role) (string, error) {
 	expTime, _ := strconv.Atoi(config.GetEnv("JWT_REFRESH_EXP_TIME", "30"))
 
 	// Define the claims for the refresh token
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"role":    role,
 		"exp":     time.Now().Add(time.Hour * 24 * time.Duration(expTime)).Unix(),
 	}
 
@@ -61,7 +64,10 @@ func GenerateRefreshToken(userID uuid.UUID) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateToken(tokenString string) (uuid.UUID, error) {
+func ValidateToken(tokenString string) (uuid.UUID, models.Role, error) {
+	// Remove the "Bearer " prefix if it exists
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method used
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -72,34 +78,38 @@ func ValidateToken(tokenString string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return uuid.Nil, custom_errors.ErrInvalidToken
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-
 	if !ok || !token.Valid {
-		return uuid.Nil, custom_errors.ErrInvalidToken
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
-	// Extract and validate the "user_id" claim
 	userIDStr, ok := claims["user_id"].(string)
 	if !ok {
-		return uuid.Nil, custom_errors.ErrInvalidToken
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
+	}
+
+	userRoleStr, ok := claims["role"].(string)
+	if !ok {
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		return uuid.Nil, custom_errors.ErrInvalidToken
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
-	return userID, nil
+	userRole := models.Role(userRoleStr)
+	return userID, userRole, nil
 }
 
-func ValidateRefreshToken(tokenString string) (uuid.UUID, error) {
+func ValidateRefreshToken(tokenString string) (uuid.UUID, models.Role, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method used
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid token")
+			return uuid.Nil, custom_errors.ErrInvalidToken
 		}
 
 		secretToken := config.GetEnv("JWT_REFRESH_SECRET", "nothing")
@@ -108,20 +118,32 @@ func ValidateRefreshToken(tokenString string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
+
 	if !ok || !token.Valid {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
-	userID, ok := claims["user_id"].(uuid.UUID)
+	userIDStr, ok := claims["user_id"].(string)
 	if !ok {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
-	return userID, nil
+	userRoleStr, ok := claims["role"].(string)
+	if !ok {
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return uuid.Nil, "", custom_errors.ErrInvalidToken
+	}
+
+	userRole := models.Role(userRoleStr)
+	return userID, userRole, nil
 }
 
 func CheckPassword(hashedPassword, plainPassword string) bool {

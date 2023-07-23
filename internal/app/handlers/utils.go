@@ -2,7 +2,6 @@ package handlers
 
 import (
 	custom_errors "edumatch/internal/app/errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +30,6 @@ func GetId(c *gin.Context, logger *zap.Logger) (uuid.UUID, error) {
 
 func HandleJSONBinding(c *gin.Context, target interface{}, logger *zap.Logger) error {
 	if err := c.ShouldBindJSON(&target); err != nil {
-		fmt.Println("err", err)
 		err = custom_errors.ErrHandleJSONBinding
 		return err
 	}
