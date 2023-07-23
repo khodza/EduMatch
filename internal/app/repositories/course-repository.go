@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
-	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
@@ -14,7 +14,7 @@ import (
 type CourseRepositoryInterface interface {
 	GetAllCourses() ([]models.Course, error)
 	CreateCourse(course models.Course) (models.Course, error)
-	GetCourse(courseID string) (models.Course, error)
+	GetCourse(courseID uuid.UUID) (models.Course, error)
 	UpdateCourse(newCourse models.Course) (models.Course, error)
 	DeleteCourse(courseID string) error
 }
@@ -39,11 +39,11 @@ func (r *CourseRepository) CreateCourse(course models.Course) (models.Course, er
 	if err != nil {
 		return models.Course{}, err
 	}
-	fmt.Println("1>>>>\n", newCourse, "\n")
+
 	return newCourse, nil
 }
 
-func (r *CourseRepository) GetCourse(courseID string) (models.Course, error) {
+func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) {
 	var (
 		course    models.Course
 		query     = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at  FROM courses WHERE id=$1 AND deleted_at is null`
