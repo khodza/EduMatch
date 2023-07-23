@@ -65,7 +65,9 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 
 func (h *CourseHandler) GetCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)
-
+	if err != nil {
+		return
+	}
 	course, err := h.courseService.GetCourse(courseID)
 	if err != nil {
 		c.Error(err)
