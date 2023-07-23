@@ -1,16 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-
-CREATE TABLE "contacts" (
-    "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "user_id" uuid REFERENCES "users" ("id"),
-    "edu_center_id" uuid REFERENCES "edu_centers" ("id"),
-    "instagram" varchar(255),
-    "telegram" varchar(255),
-    "website" varchar(255),
-    "phone_number" varchar(50)
-);
-
 CREATE TABLE "users" (
     "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     "first_name" varchar(255),
@@ -21,8 +10,10 @@ CREATE TABLE "users" (
     "role" varchar(50) DEFAULT 'User',
     "avatar" varchar(255),
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP
+    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "deleted_at" TIMESTAMP
 );
+
 
 CREATE TABLE "edu_centers" (
     "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -35,6 +26,7 @@ CREATE TABLE "edu_centers" (
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE "contacts" (
     "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -58,7 +50,7 @@ CREATE TABLE "courses" (
     "teacher" varchar(255),
     "edu_center_id" uuid REFERENCES "edu_centers" ("id"),
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp,
+    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "deleted_at" timestamp
 );
 

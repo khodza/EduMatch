@@ -21,6 +21,8 @@ var CustomErrors = map[string]int{
 	ErrCourseNotFound.Error(): http.StatusNotFound,
 	ErrCourseExists.Error():   http.StatusBadRequest,
 	ErrInvalidToken.Error():   http.StatusUnauthorized,
+	//auth
+	ErrUnauthorized.Error(): http.StatusUnauthorized,
 }
 
 // utils errors
@@ -44,6 +46,7 @@ var ErrCourseExists = errors.New("course is exists")
 // auth errors
 var (
 	ErrInvalidToken = errors.New("invalid token")
+	ErrUnauthorized = errors.New("you are not allowed to this endpoint")
 )
 
 // validation(not handles as usual errors)

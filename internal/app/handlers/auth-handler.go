@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
 	"edumatch/internal/app/services"
 	"net/http"
@@ -72,7 +73,7 @@ func (h *AuthHandler) ProtectedEndpoint(roles ...models.Role) gin.HandlerFunc {
 		if token == "" {
 			token = c.Query("token")
 		}
-		userID, role, err := services.ValidateToken(token)
+		userID, role, err := services.ValidateToken(token, false)
 		if err != nil {
 			c.Error(err)
 			c.Abort()
@@ -93,7 +94,7 @@ func (h *AuthHandler) ProtectedEndpoint(roles ...models.Role) gin.HandlerFunc {
 			}
 
 			if !authorized {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+				c.Error(custom_errors.ErrUnauthorized)
 				c.Abort()
 				return
 			}
@@ -104,22 +105,20 @@ func (h *AuthHandler) ProtectedEndpoint(roles ...models.Role) gin.HandlerFunc {
 }
 
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	// Retrieve the refresh token from the request body or header
 	refreshToken := c.PostForm("refresh_token")
 	if refreshToken == "" {
 		refreshToken = c.GetHeader("Authorization")
 	}
 
 	// Validate the refresh token
-	userID, userRole, err := services.ValidateRefreshToken(refreshToken)
+	userID, userRole, err := services.ValidateToken(refreshToken, true)
 	if err != nil {
-
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		c.Error(err)
 		return
 	}
 
 	// Generate a new JWT token
-	token, err := services.GenerateToken(userID, userRole)
+	token, err := services.GenerateToken(userID, userRole, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
