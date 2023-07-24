@@ -1,0 +1,338 @@
+definitions:
+  models.AllCourses:
+    properties:
+      courses:
+        $ref: '#/definitions/models.Course'
+    type: object
+  models.AllEduCenters:
+    properties:
+      edu_centers:
+        items:
+          $ref: '#/definitions/models.EduCenter'
+        type: array
+    type: object
+  models.Course:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      edu_center_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      teacher:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.EduCenter:
+    properties:
+      address:
+        type: string
+      cover_image:
+        type: string
+      created_at:
+        type: string
+      html_description:
+        type: string
+      id:
+        type: string
+      location:
+        $ref: '#/definitions/models.Point'
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    type: object
+  models.Empty:
+    type: object
+  models.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Point:
+    properties:
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
+  models.StandardErrorModel:
+    properties:
+      error:
+        $ref: '#/definitions/models.Error'
+    type: object
+info:
+  contact: {}
+paths:
+  /api/courses:
+    get:
+      consumes:
+      - application/json
+      description: This API for getting all courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AllCourses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: GetAllCourses
+      tags:
+      - Course
+    post:
+      consumes:
+      - application/json
+      description: This API for creating course
+      parameters:
+      - description: CourseBody
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: CreateCourse
+      tags:
+      - Course
+    put:
+      consumes:
+      - application/json
+      description: This API for updating Course
+      parameters:
+      - description: CourseBody
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: UpdateCourse
+      tags:
+      - Course
+  /api/courses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: This API for deleting Course
+      parameters:
+      - description: Course_id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: DeleteCourse
+      tags:
+      - Course
+    get:
+      consumes:
+      - application/json
+      description: This API for getting Course
+      parameters:
+      - description: Course_id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: GetCourse
+      tags:
+      - Course
+  /api/educenters:
+    delete:
+      consumes:
+      - application/json
+      description: This API for deleting EduCenter
+      parameters:
+      - description: EduCenter_ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: Delete EduCenter
+      tags:
+      - EduCenter
+    get:
+      consumes:
+      - application/json
+      description: This API for getting EduCenter
+      parameters:
+      - description: EduCenter_ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduCenter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: Get Edu Center
+      tags:
+      - EduCenter
+    post:
+      consumes:
+      - application/json
+      description: This API for creating Edu Center
+      parameters:
+      - description: CourseBody
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EduCenter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduCenter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: Create Edu Center
+      tags:
+      - EduCenter
+    put:
+      consumes:
+      - application/json
+      description: This API for updating eduCenter
+      parameters:
+      - description: EduCenter
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EduCenter'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduCenter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.StandardErrorModel'
+      summary: Update EduCenter
+      tags:
+      - EduCenter
+  /example/helloworld:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: ping example
+      tags:
+      - example
+swagger: "2.0"

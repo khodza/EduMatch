@@ -1,7 +1,8 @@
 package routers
 
 import (
-	"edumatch/cmd/docs"
+	"edumatch/internal/app/docs"
+	_ "edumatch/internal/app/docs"
 	"edumatch/internal/app/models"
 	"edumatch/internal/dependencies"
 
@@ -12,7 +13,7 @@ import (
 
 func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api := router.Group("/api")
-	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.BasePath = ""
 	//auth
 	api.POST("/auth/signup", h.AuthHandler.SignUp)
 	api.POST("/auth/login", h.AuthHandler.Login)
@@ -28,8 +29,8 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
 	api.GET("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GetEduCenters)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
-	api.PATCH("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
-	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
+	api.PUT("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
+	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
 	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)
@@ -38,5 +39,6 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
 	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
 
-	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	url := ginSwagger.URL("swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }

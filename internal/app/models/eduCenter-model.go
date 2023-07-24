@@ -23,3 +23,7 @@ type EduCenterImages struct {
 	EduCenterID int       `json:"-" db:"edu_center_id"`
 	ImageLink   string    `db:"image_link"`
 }
+
+type AllEduCenters struct {
+	EduCenters []EduCenter `json:"edu_centers"`
+}
