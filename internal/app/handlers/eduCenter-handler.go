@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -45,8 +46,13 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
 	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
+		c.Error(err)
 		return
 	}
+
+	//attaching owner
+	userID := c.MustGet("user_id").(uuid.UUID)
+	eduCenter.OwnerID = userID
 
 	createdEduCenter, err := h.eduCenterService.CreateEduCenter(eduCenter)
 
@@ -81,17 +87,12 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 }
 
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
-	eduCenterID, err := GetId(c, h.logger)
-	if err != nil {
-		return
-	}
-
 	var eduCenter models.EduCenter
 	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
 		return
 	}
 
-	updatedEduCenter, err := h.eduCenterService.UpdateEduCenter(eduCenterID, eduCenter)
+	updatedEduCenter, err := h.eduCenterService.UpdateEduCenter(eduCenter)
 	if err != nil {
 		c.Error(err)
 		return

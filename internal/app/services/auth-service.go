@@ -31,8 +31,8 @@ func (s *AuthService) RegisterUser(user models.RegUser) (models.Tokens, error) {
 	role := createdUser.Role
 
 	// Generate a new JWT token
-	var token string
-	token, err = GenerateToken(userID, role, false)
+	var accessToken string
+	accessToken, err = GenerateToken(userID, role, false)
 	if err != nil {
 		return models.Tokens{}, err
 	}
@@ -44,7 +44,7 @@ func (s *AuthService) RegisterUser(user models.RegUser) (models.Tokens, error) {
 		return models.Tokens{}, err
 	}
 
-	tokens := models.Tokens{Token: token, RefreshToken: refreshToken}
+	tokens := models.Tokens{AccessToken: accessToken, RefreshToken: refreshToken}
 	return tokens, nil
 }
 
@@ -72,6 +72,6 @@ func (s *AuthService) Login(loggingUser models.LoggingUser) (models.Tokens, erro
 		return models.Tokens{}, err
 	}
 
-	tokens := models.Tokens{Token: token, RefreshToken: refreshToken}
+	tokens := models.Tokens{AccessToken: token, RefreshToken: refreshToken}
 	return tokens, nil
 }

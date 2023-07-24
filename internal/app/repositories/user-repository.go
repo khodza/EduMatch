@@ -41,7 +41,7 @@ func (r *UserRepository) GetUsers() ([]models.User, error) {
 }
 
 func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
-	query := "INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING first_name, last_name, username, password"
+	query := "INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING id,first_name, last_name, username, password,role"
 	var createdUser models.User
 	err := r.db.Get(&createdUser, query, user.FirstName, user.LastName, user.UserName, user.Password)
 	if err != nil {
