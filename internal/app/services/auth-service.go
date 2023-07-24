@@ -32,14 +32,14 @@ func (s *AuthService) RegisterUser(user models.RegUser) (models.Tokens, error) {
 
 	// Generate a new JWT token
 	var token string
-	token, err = GenerateToken(userID, role)
+	token, err = GenerateToken(userID, role, false)
 	if err != nil {
 		return models.Tokens{}, err
 	}
 
 	// Generate a new refresh token
 	var refreshToken string
-	refreshToken, err = GenerateRefreshToken(userID, role)
+	refreshToken, err = GenerateToken(userID, role, true)
 	if err != nil {
 		return models.Tokens{}, err
 	}
@@ -60,14 +60,14 @@ func (s *AuthService) Login(loggingUser models.LoggingUser) (models.Tokens, erro
 
 	// Generate a new JWT token
 	var token string
-	token, err = GenerateToken(user.ID, user.Role)
+	token, err = GenerateToken(user.ID, user.Role, false)
 	if err != nil {
 		return models.Tokens{}, err
 	}
 
 	// Generate a new refresh token
 	var refreshToken string
-	refreshToken, err = GenerateRefreshToken(user.ID, user.Role)
+	refreshToken, err = GenerateToken(user.ID, user.Role, true)
 	if err != nil {
 		return models.Tokens{}, err
 	}

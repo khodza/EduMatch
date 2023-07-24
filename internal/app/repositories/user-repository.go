@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
-	"fmt"
-	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,7 +17,7 @@ type UserRepositoryInterface interface {
 	GetUser(userID uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
-	UpdateUser(userID uuid.UUID, user models.User) (models.User, error)
+	UpdateUser(user models.User) (models.User, error)
 	DeleteUser(userID uuid.UUID) error
 }
 type UserRepository struct {
@@ -33,7 +32,7 @@ func NewUserRepository(db *sqlx.DB) UserRepositoryInterface {
 
 func (r *UserRepository) GetUsers() ([]models.User, error) {
 	var users []models.User
-	query := "SELECT * FROM USERS"
+	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role,created_at,updated_at FROM USERS WHERE deleted_at is null"
 	err := r.db.Select(&users, query)
 	if err != nil {
 		return nil, err
@@ -41,14 +40,13 @@ func (r *UserRepository) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// eduCenterID,rating
 func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
 	query := "INSERT INTO users (first_name, last_name, username, password) VALUES ($1, $2, $3, $4) RETURNING first_name, last_name, username, password"
 	var createdUser models.User
 	err := r.db.Get(&createdUser, query, user.FirstName, user.LastName, user.UserName, user.Password)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			err = custom_errors.ErrEmailExist
+			err = custom_errors.ErrUserExist
 		}
 		return models.User{}, err
 	}
@@ -57,7 +55,7 @@ func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
 
 func (r *UserRepository) GetUser(userID uuid.UUID) (models.User, error) {
 	var user models.User
-	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role FROM users WHERE id = $1"
+	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role,avatar,created_at,updated_at FROM users WHERE id = $1 AND deleted_at is null"
 	err := r.db.Get(&user, query, userID)
 	if err != nil {
 		//not found
@@ -85,7 +83,7 @@ func (r *UserRepository) GetUserByEmail(email string) (models.User, error) {
 
 func (r *UserRepository) GetUserByUsername(username string) (models.User, error) {
 	var user models.User
-	query := "SELECT id,first_name,last_name,COALESCE(email, '') as email,username,password,role FROM users WHERE username = $1"
+	query := "SELECT id,first_name,last_name,COALESCE(email, '') as email,username,password,role FROM users WHERE username = $1 AND deleted_at is null"
 	err := r.db.Get(&user, query, username)
 	if err != nil {
 		//not found
@@ -97,103 +95,37 @@ func (r *UserRepository) GetUserByUsername(username string) (models.User, error)
 	return user, nil
 }
 
-func (r *UserRepository) UpdateUser(userID uuid.UUID, user models.User) (models.User, error) {
-	// Start building query
-	updateQuery := "UPDATE users SET"
-	params := []interface{}{}
-	paramCount := 1
-
-	if user.FirstName != "" {
-		updateQuery += fmt.Sprintf(" first_name = $%d,", paramCount)
-		params = append(params, user.FirstName)
-		paramCount++
-	}
-
-	if user.LastName != "" {
-		updateQuery += fmt.Sprintf(" last_name = $%d,", paramCount)
-		params = append(params, user.LastName)
-		paramCount++
-	}
-
-	if user.Email != "" {
-		updateQuery += fmt.Sprintf(" email = $%d,", paramCount)
-		params = append(params, user.Email)
-		paramCount++
-	}
-
-	if user.Username != "" {
-		updateQuery += fmt.Sprintf(" username = $%d,", paramCount)
-		params = append(params, user.Username)
-		paramCount++
-	}
-
-	if user.Password != "" {
-		updateQuery += fmt.Sprintf(" password = $%d,", paramCount)
-		params = append(params, user.Password)
-		paramCount++
-	}
-
-	if user.Role != "" {
-		updateQuery += fmt.Sprintf(" role = $%d,", paramCount)
-		params = append(params, user.Role)
-		paramCount++
-	}
-
-	if user.Avatar != "" {
-		updateQuery += fmt.Sprintf(" avatar = $%d,", paramCount)
-		params = append(params, user.Avatar)
-		paramCount++
-	}
-
-	// Add updated_at column update
-	updateQuery += " updated_at = CURRENT_TIMESTAMP,"
-
-	// Remove the trailing comma and space from the update query
-	updateQuery = strings.TrimSuffix(updateQuery, ",")
-
-	if len(params) == 0 {
-		// Retrieve the  user if nothing to update
-		updatedUser, err := r.GetUser(userID)
-		if err != nil {
-			return models.User{}, err
-		}
-
-		return updatedUser, nil
-	}
-
-	updateQuery += fmt.Sprintf(" WHERE id = $%d", paramCount)
-	params = append(params, userID)
-
-	//executing update query
-	_, err := r.db.Exec(updateQuery, params...)
+func (r *UserRepository) UpdateUser(user models.User) (models.User, error) {
+	// Prepare the update query
+	user.UpdatedAt = time.Now().UTC()
+	query := `
+		UPDATE users
+		SET first_name=:first_name, last_name=:last_name, email=:email, username=:username,avatar=:avatar, updated_at=:updated_at
+		WHERE id=:id AND deleted_at is null
+	`
+	// Execute the query
+	_, err := r.db.NamedExec(query, user)
 	if err != nil {
-		//duplicate error
-		pqErr, _ := err.(*pq.Error)
-		if pqErr.Code == "23505" {
-			err = custom_errors.ErrEmailExist
-		}
-		//not found
 		if err == sql.ErrNoRows {
 			err = custom_errors.ErrUserNotFound
 		}
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			err = custom_errors.ErrUserExist
+		}
 		return models.User{}, err
 	}
-
-	// Retrieve the updated user from the database
+	//get updated user
 	var updatedUser models.User
-	updatedUser, err = r.GetUser(userID)
+	updatedUser, err = r.GetUser(user.ID)
 	if err != nil {
 		return models.User{}, err
 	}
-
+	// Return the updated user (optional)
 	return updatedUser, nil
 }
 
 func (r *UserRepository) DeleteUser(userID uuid.UUID) error {
-	query := "DELETE FROM users WHERE id = $1"
-
-	_, err := r.db.Exec(query, userID)
-
+	_, err := r.db.Exec(`UPDATE users SET deleted_at=$2 WHERE id=$1`, userID, time.Now().UTC())
 	if err != nil {
 		return err
 	}

@@ -81,17 +81,13 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-	userID, err := GetId(c, h.logger)
-	if err != nil {
-		return
-	}
 
 	var user models.User
 	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
 		return
 	}
 
-	updatedUser, err := h.userService.UpdateUser(userID, user)
+	updatedUser, err := h.userService.UpdateUser(user)
 
 	if err != nil {
 		c.Error(err)
