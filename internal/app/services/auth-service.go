@@ -3,11 +3,15 @@ package services
 import (
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
+	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type AuthServiceInterface interface {
 	RegisterUser(user models.RegUser) (models.Tokens, error)
 	Login(models.LoggingUser) (models.Tokens, error)
+	UserStillExists(userID uuid.UUID) bool
 }
 
 type AuthService struct {
@@ -74,4 +78,10 @@ func (s *AuthService) Login(loggingUser models.LoggingUser) (models.Tokens, erro
 
 	tokens := models.Tokens{AccessToken: token, RefreshToken: refreshToken}
 	return tokens, nil
+}
+
+func (s *AuthService) UserStillExists(userID uuid.UUID) bool {
+	_, err := s.userService.GetUser(userID)
+	fmt.Println(err)
+	return err == nil
 }

@@ -79,7 +79,11 @@ func (h *AuthHandler) ProtectedEndpoint(roles ...models.Role) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
+		if !h.authService.UserStillExists(userID) {
+			c.Error(custom_errors.ErrUserNoLongerExist)
+			c.Abort()
+			return
+		}
 		c.Set("user_id", userID)
 		c.Set("user_role", role)
 
