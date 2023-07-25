@@ -81,11 +81,12 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-
-	var user models.User
-	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
-		return
+	var user models.UpdateUserDto
+	if err := c.ShouldBind(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
 	}
+	userID, _ := GetId(c, h.logger)
+	user.ID = userID
 
 	updatedUser, err := h.userService.UpdateUser(user)
 

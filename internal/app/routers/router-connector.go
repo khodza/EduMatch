@@ -19,8 +19,8 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.POST("/auth/refresh", h.AuthHandler.RefreshToken)
 
 	//users
-	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.UserRole), h.UserHandler.GetUsers)
-	api.PATCH("users/", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
+	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.AdminRole), h.UserHandler.GetUsers)
+	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
 	api.GET("/users/:id", h.UserHandler.GetUser)
 	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 

@@ -14,7 +14,7 @@ type UserServiceInterface interface {
 	GetUser(userID uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
-	UpdateUser(user models.User) (models.User, error)
+	UpdateUser(user models.UpdateUserDto) (models.User, error)
 	DeleteUser(userID uuid.UUID) error
 }
 
@@ -85,10 +85,18 @@ func (s *UserService) GetUserByUsername(username string) (models.User, error) {
 	}
 	return user, nil
 }
-func (s *UserService) UpdateUser(user models.User) (models.User, error) {
+func (s *UserService) UpdateUser(user models.UpdateUserDto) (models.User, error) {
 	//validate before update
 	if err := s.validator.ValidateUserUpdate(&user); err != nil {
 		return models.User{}, err
+	}
+
+	if user.Avatar != nil {
+		fileName, err := SaveImage(user.Avatar, "avatars")
+		if err != nil {
+			return models.User{}, err
+		}
+		user.AvatarUrl = fileName
 	}
 
 	updatedUser, err := s.userRepository.UpdateUser(user)

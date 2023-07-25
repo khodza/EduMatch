@@ -5,6 +5,9 @@
 
 .vscode/
 
+
+#Static data
+/internal/static/
 # Sensitive information
 .env
 *.env

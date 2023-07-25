@@ -17,7 +17,7 @@ type UserRepositoryInterface interface {
 	GetUser(userID uuid.UUID) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	GetUserByUsername(username string) (models.User, error)
-	UpdateUser(user models.User) (models.User, error)
+	UpdateUser(user models.UpdateUserDto) (models.User, error)
 	DeleteUser(userID uuid.UUID) error
 }
 type UserRepository struct {
@@ -95,7 +95,7 @@ func (r *UserRepository) GetUserByUsername(username string) (models.User, error)
 	return user, nil
 }
 
-func (r *UserRepository) UpdateUser(user models.User) (models.User, error) {
+func (r *UserRepository) UpdateUser(user models.UpdateUserDto) (models.User, error) {
 	// Prepare the update query
 	user.UpdatedAt = time.Now().UTC()
 	query := `
