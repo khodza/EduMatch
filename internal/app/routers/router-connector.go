@@ -10,6 +10,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api := router.Group("/api")
 	docs.SwaggerInfo.BasePath = ""
@@ -20,7 +24,7 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 
 	//users
 	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.AdminRole), h.UserHandler.GetUsers)
-	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
+	api.PATCH("/users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
 	api.GET("/users/:id", h.UserHandler.GetUser)
 	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 
