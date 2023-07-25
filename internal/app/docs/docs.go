@@ -39,13 +39,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -83,13 +83,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -127,13 +127,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -171,7 +171,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -207,13 +207,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -251,13 +251,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -292,13 +292,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -336,13 +336,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -378,13 +378,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.StandardErrorModel"
+                            "$ref": "#/definitions/models.CustomError"
                         }
                     }
                 }
@@ -460,6 +460,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CustomError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.EduCenter": {
             "type": "object",
             "required": [
@@ -498,30 +509,14 @@ const docTemplate = `{
         "models.Empty": {
             "type": "object"
         },
-        "models.Error": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Point": {
             "type": "object",
             "properties": {
-                "x": {
+                "latitude": {
                     "type": "number"
                 },
-                "y": {
+                "longitude": {
                     "type": "number"
-                }
-            }
-        },
-        "models.StandardErrorModel": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/models.Error"
                 }
             }
         }
