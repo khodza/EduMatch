@@ -28,6 +28,13 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.CustomError:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
   models.EduCenter:
     properties:
       address:
@@ -53,22 +60,12 @@ definitions:
     type: object
   models.Empty:
     type: object
-  models.Error:
-    properties:
-      message:
-        type: string
-    type: object
   models.Point:
     properties:
-      x:
+      latitude:
         type: number
-      "y":
+      longitude:
         type: number
-    type: object
-  models.StandardErrorModel:
-    properties:
-      error:
-        $ref: '#/definitions/models.Error'
     type: object
 info:
   contact: {}
@@ -88,11 +85,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: GetAllCourses
       tags:
       - Course
@@ -117,11 +114,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: CreateCourse
       tags:
       - Course
@@ -146,11 +143,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: UpdateCourse
       tags:
       - Course
@@ -175,11 +172,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: DeleteCourse
       tags:
       - Course
@@ -203,7 +200,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: GetCourse
       tags:
       - Course
@@ -228,11 +225,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: Delete EduCenter
       tags:
       - EduCenter
@@ -256,11 +253,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: Get Edu Center
       tags:
       - EduCenter
@@ -285,11 +282,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: Create Edu Center
       tags:
       - EduCenter
@@ -312,11 +309,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.StandardErrorModel'
+            $ref: '#/definitions/models.CustomError'
       summary: Update EduCenter
       tags:
       - EduCenter

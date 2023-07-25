@@ -36,8 +36,8 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 // @Produce json
 // @Param body body models.Course true "CourseBody"
 // @Success 200 {object} models.Course
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/courses [POST]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var course models.Course
@@ -64,8 +64,8 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // @Produce json
 // @Param body body models.Course true "CourseBody"
 // @Success 200 {object} models.Course
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/courses [PUT]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	var newCourse models.Course
@@ -93,8 +93,8 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Course_id"
 // @Success 200 {object} models.Course
-// @Failure 400 {object} models.StandardErrorModel
-// @Failuer 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failuer 500 {object} models.CustomError
 // @Router /api/courses/{id} [GET]
 func (h *CourseHandler) GetCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)
@@ -119,8 +119,8 @@ func (h *CourseHandler) GetCourse(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.AllCourses
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/courses [GET]
 func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	courses, err := h.courseService.GetAllCourses()
@@ -134,7 +134,6 @@ func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	c.JSON(http.StatusAccepted, courses)
 }
 
-
 // DeleteCourse ...
 // @Summary DeleteCourse
 // @Description This API for deleting Course
@@ -143,8 +142,8 @@ func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Course_id"
 // @Success 200 {object} models.Empty
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/courses/{id} [DELETE]
 func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)

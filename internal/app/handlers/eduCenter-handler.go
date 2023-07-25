@@ -36,8 +36,8 @@ func NewEduCenterHandler(eduCenterService services.EduCenterServiceInterface, lo
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.AllEduCenters
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/educenters [GET]
 func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 	eduCenters, err := h.eduCenterService.GetEduCenters()
@@ -61,8 +61,8 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 // @Produce json
 // @Param body body models.EduCenter true "CourseBody"
 // @Success 200 {object} models.EduCenter
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/educenters [POST]
 func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
@@ -96,8 +96,8 @@ func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 // @Produce json
 // @Param id path string true "EduCenter_ID"
 // @Success 200 {object} models.EduCenter
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/educenters [GET]
 func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)
@@ -126,8 +126,8 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 //  @Produse json
 //  @Param body body models.EduCenter true "EduCenter"
 //  @Success 200 {object} models.EduCenter
-//  @Failure 400 {object} models.StandardErrorModel
-//  @Failure 500 {object} models.StandardErrorModel
+//  @Failure 400 {object} models.CustomError
+//  @Failure 500 {object} models.CustomError
 //  @Router /api/educenters [PUT]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
@@ -155,8 +155,8 @@ func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 // @Produce json
 // @Param id path string true "EduCenter_ID"
 // @Success 200 {object} models.Empty
-// @Failure 400 {object} models.StandardErrorModel
-// @Failure 500 {object} models.StandardErrorModel
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
 // @Router /api/educenters [DELETE]
 func (h *EduCenterHandler) DeleteEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)

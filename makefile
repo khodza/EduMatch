@@ -55,5 +55,4 @@ run:
 	go run cmd/main.go
 
 swag-gen:
-	echo ${REGISTRY}
 	swag init -g internal/app/routers/router-connector.go -o internal/app/docs
