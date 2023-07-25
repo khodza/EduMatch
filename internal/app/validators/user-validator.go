@@ -10,7 +10,7 @@ import (
 
 type UserValidatorInterface interface {
 	ValidateUserCreate(user *models.RegUser) error
-	ValidateUserUpdate(user *models.User) error
+	ValidateUserUpdate(user *models.UpdateUserDto) error
 }
 
 type UserValidator struct {
@@ -37,7 +37,7 @@ func (v *UserValidator) ValidateUserCreate(user *models.RegUser) error {
 	return nil
 }
 
-func (v *UserValidator) ValidateUserUpdate(user *models.User) error {
+func (v *UserValidator) ValidateUserUpdate(user *models.UpdateUserDto) error {
 	if user.Email == "" {
 		return nil
 	}

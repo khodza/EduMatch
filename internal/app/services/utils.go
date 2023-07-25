@@ -4,6 +4,11 @@ import (
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
 	"edumatch/internal/config"
+	"fmt"
+	"io/ioutil"
+	"mime/multipart"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -101,4 +106,35 @@ func ValidateToken(tokenString string, isRefreshToken bool) (uuid.UUID, models.R
 func CheckPassword(hashedPassword, plainPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 	return err == nil
+}
+
+func SaveImage(Image *multipart.FileHeader, folderName string) (string, error) {
+	// Handle the uploaded avatar file
+	file, err := Image.Open()
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Generate a unique file name for the avatar (you can use UUID or any other method)
+	avatarFileName := uuid.New().String() + path.Ext(Image.Filename)
+
+	// Read the contents of the uploaded file into a []byte
+	avatarData, err := ioutil.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	// Create the parent directories if they don't exist
+	avatarFolderPath := fmt.Sprintf("./internal/static/%s", folderName)
+	if err := os.MkdirAll(avatarFolderPath, 0755); err != nil {
+		return "", err
+	}
+
+	// Implement the code to save the avatar file to the server
+	avatarPath := fmt.Sprintf("./internal/static/%s/%s", folderName, avatarFileName)
+	if err := os.WriteFile(avatarPath, avatarData, 0644); err != nil {
+		return "", err
+	}
+
+	return avatarFileName, nil
 }

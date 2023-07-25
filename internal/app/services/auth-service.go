@@ -3,7 +3,6 @@ package services
 import (
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -82,6 +81,5 @@ func (s *AuthService) Login(loggingUser models.LoggingUser) (models.Tokens, erro
 
 func (s *AuthService) UserStillExists(userID uuid.UUID) bool {
 	_, err := s.userService.GetUser(userID)
-	fmt.Println(err)
 	return err == nil
 }
