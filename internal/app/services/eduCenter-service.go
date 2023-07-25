@@ -12,7 +12,7 @@ type EduCenterServiceInterface interface {
 	CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
 	GetEduCenters() ([]models.EduCenter, error)
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
-	UpdateEduCenter(eduCenterID uuid.UUID, eduCenter models.EduCenter) (models.EduCenter, error)
+	UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
 }
 type EduCenterService struct {
@@ -59,8 +59,8 @@ func (s *EduCenterService) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter
 	return eduCenter, nil
 }
 
-func (s *EduCenterService) UpdateEduCenter(eduCenterID uuid.UUID, eduCenter models.EduCenter) (models.EduCenter, error) {
-	updatedProduct, err := s.eduCenterRepository.UpdateEduCenter(eduCenterID, eduCenter)
+func (s *EduCenterService) UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error) {
+	updatedProduct, err := s.eduCenterRepository.UpdateEduCenter(eduCenter)
 	if err != nil {
 		return models.EduCenter{}, err
 	}

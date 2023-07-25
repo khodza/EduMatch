@@ -2,7 +2,6 @@ package routers
 
 import (
 	"edumatch/internal/app/docs"
-	_ "edumatch/internal/app/docs"
 	"edumatch/internal/app/models"
 	"edumatch/internal/dependencies"
 
@@ -20,17 +19,17 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.POST("/auth/refresh", h.AuthHandler.RefreshToken)
 
 	//users
-	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.AdminRole), h.UserHandler.GetUsers)
+	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.UserRole), h.UserHandler.GetUsers)
+	api.PATCH("users/", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
 	api.GET("/users/:id", h.UserHandler.GetUser)
-	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
 	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 
 	//eduCenters
 	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
-	api.GET("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GetEduCenters)
+	api.GET("/educenters/", h.EduCenterHandler.GetEduCenters)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
-	api.PUT("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
-	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
+	api.PATCH("educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
+	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
 	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)
