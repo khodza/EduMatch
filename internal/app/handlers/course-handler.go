@@ -28,6 +28,17 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 	}
 }
 
+// CreateCourse ...
+// @Summary CreateCourse
+// @Description This API for creating course
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param body body models.Course true "CourseBody"
+// @Success 200 {object} models.Course
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/courses [POST]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var course models.Course
 	if err := HandleJSONBinding(c, &course, h.logger); err != nil {
@@ -45,6 +56,17 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	c.JSON(http.StatusOK, createdUser)
 }
 
+// UpdateCourse ...
+// @Summary UpdateCourse
+// @Description This API for updating Course
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param body body models.Course true "CourseBody"
+// @Success 200 {object} models.Course
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/courses [PUT]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	var newCourse models.Course
 	if err := HandleJSONBinding(c, &newCourse, h.logger); err != nil {
@@ -63,6 +85,17 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	c.JSON(http.StatusAccepted, course)
 }
 
+// GetCourse ...
+// @Summary GetCourse
+// @Description This API for getting Course
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param id path string true "Course_id"
+// @Success 200 {object} models.Course
+// @Failure 400 {object} models.StandardErrorModel
+// @Failuer 500 {object} models.StandardErrorModel
+// @Router /api/courses/{id} [GET]
 func (h *CourseHandler) GetCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)
 	if err != nil {
@@ -79,6 +112,16 @@ func (h *CourseHandler) GetCourse(c *gin.Context) {
 	c.JSON(http.StatusAccepted, course)
 }
 
+// GetAllCourses ...
+// @Summary GetAllCourses
+// @Description This API for getting all courses
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.AllCourses
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/courses [GET]
 func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	courses, err := h.courseService.GetAllCourses()
 	if err != nil {
@@ -91,6 +134,18 @@ func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	c.JSON(http.StatusAccepted, courses)
 }
 
+
+// DeleteCourse ...
+// @Summary DeleteCourse
+// @Description This API for deleting Course
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param id path string true "Course_id"
+// @Success 200 {object} models.Empty
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/courses/{id} [DELETE]
 func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)
 	if err != nil {

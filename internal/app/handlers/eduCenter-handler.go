@@ -29,6 +29,16 @@ func NewEduCenterHandler(eduCenterService services.EduCenterServiceInterface, lo
 	}
 }
 
+// Get EduCenters ...
+// @Summary Get EduCenters
+// @Description This API for getting all EduCenters
+// @Tags EduCenter
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.AllEduCenters
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/educenters [GET]
 func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 	eduCenters, err := h.eduCenterService.GetEduCenters()
 
@@ -43,6 +53,17 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 	c.JSON(http.StatusOK, eduCenters)
 }
 
+// CreateEduCenter ...
+// @Summary Create Edu Center
+// @Description This API for creating Edu Center
+// @Tags EduCenter
+// @Accept json
+// @Produce json
+// @Param body body models.EduCenter true "CourseBody"
+// @Success 200 {object} models.EduCenter
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/educenters [POST]
 func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
 	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
@@ -67,6 +88,17 @@ func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 	c.JSON(http.StatusCreated, createdEduCenter)
 }
 
+// Get EduCenter ...
+// @Summary Get Edu Center
+// @Description This API for getting EduCenter
+// @Tags EduCenter
+// @Accept json
+// @Produce json
+// @Param id path string true "EduCenter_ID"
+// @Success 200 {object} models.EduCenter
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/educenters [GET]
 func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)
 	if err != nil {
@@ -86,6 +118,17 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 	c.JSON(http.StatusOK, eduCenter)
 }
 
+//	Update EduCenter ...
+//  @Summary Update EduCenter
+//	@Description This API for updating eduCenter
+//  @Tags EduCenter
+//  @Accept json
+//  @Produse json
+//  @Param body body models.EduCenter true "EduCenter"
+//  @Success 200 {object} models.EduCenter
+//  @Failure 400 {object} models.StandardErrorModel
+//  @Failure 500 {object} models.StandardErrorModel
+//  @Router /api/educenters [PUT]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
 	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
@@ -104,6 +147,17 @@ func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedEduCenter)
 }
 
+// Delete EduCenter ....
+// @Summary Delete EduCenter
+// @Description This API for deleting EduCenter
+// @Tags EduCenter
+// @Accept json
+// @Produce json
+// @Param id path string true "EduCenter_ID"
+// @Success 200 {object} models.Empty
+// @Failure 400 {object} models.StandardErrorModel
+// @Failure 500 {object} models.StandardErrorModel
+// @Router /api/educenters [DELETE]
 func (h *EduCenterHandler) DeleteEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)
 	if err != nil {
