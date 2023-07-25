@@ -38,6 +38,7 @@ var ErrEduCenterNotFound = errors.New("education center not found")
 var ErrUserExist = errors.New("user with this username or email already exists")
 var ErrUserNotFound = errors.New("user not found")
 var ErrWrongPassword = errors.New("wrong password provided")
+var ErrCanNotGetUserFromCTX = errors.New("cannot get user from ctx")
 
 // course errors
 var ErrCourseNotFound = errors.New("course not found")

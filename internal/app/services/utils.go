@@ -4,7 +4,6 @@ import (
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
 	"edumatch/internal/config"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -70,13 +69,10 @@ func ValidateToken(tokenString string, isRefreshToken bool) (uuid.UUID, models.R
 	})
 
 	if err != nil {
-		fmt.Println(err)
 		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-	fmt.Println(claims)
-	fmt.Println(claims)
 	if !ok || !token.Valid {
 		return uuid.Nil, "", custom_errors.ErrInvalidToken
 	}

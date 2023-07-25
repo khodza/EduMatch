@@ -17,14 +17,15 @@ CREATE TABLE "users" (
 
 CREATE TABLE "edu_centers" (
     "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "name" varchar(255),
+    "name" varchar(255) UNIQUE,
     "html_description" text,
     "address" varchar(255),
     "location" POINT,
     "owner_id" uuid REFERENCES "users" ("id"),
-    "image_url" varchar(250),
+    "cover_image" varchar(250),
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "deleted_at" TIMESTAMP
 );
 
 
