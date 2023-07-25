@@ -22,7 +22,8 @@ var CustomErrors = map[string]int{
 	ErrCourseExists.Error():   http.StatusBadRequest,
 	ErrInvalidToken.Error():   http.StatusUnauthorized,
 	//auth
-	ErrUnauthorized.Error(): http.StatusUnauthorized,
+	ErrUnauthorized.Error():      http.StatusUnauthorized,
+	ErrUserNoLongerExist.Error(): http.StatusUnauthorized,
 }
 
 // utils errors
@@ -31,23 +32,30 @@ var (
 )
 
 // eduCenter errors
-var ErrEduCenterExist = errors.New("education center already exist")
-var ErrEduCenterNotFound = errors.New("education center not found")
+var (
+	ErrEduCenterExist    = errors.New("education center already exist")
+	ErrEduCenterNotFound = errors.New("education center not found")
+)
 
 // users errors
-var ErrUserExist = errors.New("user with this username or email already exists")
-var ErrUserNotFound = errors.New("user not found")
-var ErrWrongPassword = errors.New("wrong password provided")
-var ErrCanNotGetUserFromCTX = errors.New("cannot get user from ctx")
+var (
+	ErrUserExist            = errors.New("user with this username or email already exists")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrWrongPassword        = errors.New("wrong password provided")
+	ErrCanNotGetUserFromCTX = errors.New("cannot get user from ctx")
+)
 
 // course errors
-var ErrCourseNotFound = errors.New("course not found")
-var ErrCourseExists = errors.New("course is exists")
+var (
+	ErrCourseNotFound = errors.New("course not found")
+	ErrCourseExists   = errors.New("course is exists")
+)
 
 // auth errors
 var (
-	ErrInvalidToken = errors.New("invalid token")
-	ErrUnauthorized = errors.New("you are not allowed to this endpoint")
+	ErrInvalidToken      = errors.New("invalid token")
+	ErrUnauthorized      = errors.New("you are not allowed to this endpoint")
+	ErrUserNoLongerExist = errors.New("user belonging to this token no longer exist")
 )
 
 // validation(not handles as usual errors)

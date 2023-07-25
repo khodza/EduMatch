@@ -55,7 +55,7 @@ func (r *UserRepository) CreateUser(user models.RegUser) (models.User, error) {
 
 func (r *UserRepository) GetUser(userID uuid.UUID) (models.User, error) {
 	var user models.User
-	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role,avatar,created_at,updated_at FROM users WHERE id = $1 AND deleted_at is null"
+	query := "SELECT id,first_name,last_name,username,COALESCE(email, '') as email,role,COALESCE(avatar, '') as avatar,created_at,updated_at FROM users WHERE id = $1 AND deleted_at is null"
 	err := r.db.Get(&user, query, userID)
 	if err != nil {
 		//not found
