@@ -10,6 +10,7 @@ import (
 var CustomErrors = map[string]int{
 	// utils errors
 	ErrHandleBinding.Error(): http.StatusBadRequest,
+	ErrInvalidID.Error():     http.StatusBadRequest,
 	// eduCenter errors
 	ErrEduCenterExist.Error():    http.StatusBadRequest,
 	ErrEduCenterNotFound.Error(): http.StatusNotFound,
@@ -29,6 +30,7 @@ var CustomErrors = map[string]int{
 // utils errors
 var (
 	ErrHandleBinding = errors.New("invalid request payload")
+	ErrInvalidID     = errors.New("invalid id provided")
 )
 
 // eduCenter errors

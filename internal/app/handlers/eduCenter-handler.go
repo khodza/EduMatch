@@ -67,7 +67,7 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 // @Router /api/educenters [POST]
 func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 	var eduCenter models.CreateEduCenterDto
-	if err := HandleFormDataBinding(c, &eduCenter); err != nil {
+	if err := HandleFormDataBinding(c, &eduCenter, h.logger); err != nil {
 		c.Error(err)
 		return
 	}
@@ -102,6 +102,7 @@ func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
 func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -132,13 +133,14 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 //	 @Router /api/educenters [PATCH]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	var eduCenter models.UpdateEduCenterDto
-	if err := HandleFormDataBinding(c, &eduCenter); err != nil {
+	if err := HandleFormDataBinding(c, &eduCenter, h.logger); err != nil {
 		c.Error(err)
 		return
 	}
 	//get edu Center ID and attaching it
 	eduCenterID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 	eduCenter.ID = eduCenterID
@@ -170,6 +172,7 @@ func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 func (h *EduCenterHandler) DeleteEduCenter(c *gin.Context) {
 	eduCenterID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 	if err := h.eduCenterService.DeleteEduCenter(eduCenterID); err != nil {

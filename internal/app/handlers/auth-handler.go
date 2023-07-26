@@ -42,7 +42,7 @@ func NewAuthHandler(authService services.AuthServiceInterface, logger *zap.Logge
 // @Router /auth/signup [POST]
 func (h *AuthHandler) SignUp(c *gin.Context) {
 	var user models.RegUser
-	if err := HandleJSONBinding(c, &user); err != nil {
+	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
 		c.Error(err)
 		return
 	}
@@ -72,7 +72,7 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 // @Router /auth/login [POST]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var loggingUser models.LoggingUser
-	if err := HandleJSONBinding(c, &loggingUser); err != nil {
+	if err := HandleJSONBinding(c, &loggingUser, h.logger); err != nil {
 		c.Error(err)
 		return
 	}
