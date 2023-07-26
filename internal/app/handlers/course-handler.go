@@ -42,7 +42,7 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 // @Router /api/courses [POST]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var course models.Course
-	if err := HandleJSONBinding(c, &course, h.logger); err != nil {
+	if err := HandleJSONBinding(c, &course); err != nil {
 		return
 	}
 	createdUser, err := h.courseService.CreateCourse(course)
@@ -71,7 +71,7 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // @Router /api/courses [PUT]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	var newCourse models.Course
-	if err := HandleJSONBinding(c, &newCourse, h.logger); err != nil {
+	if err := HandleJSONBinding(c, &newCourse); err != nil {
 		c.Error(err)
 		return
 	}

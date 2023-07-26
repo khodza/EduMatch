@@ -66,12 +66,11 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 // @Failure 500 {object} models.CustomError
 // @Router /api/educenters [POST]
 func (h *EduCenterHandler) CreateEduCenter(c *gin.Context) {
-	var eduCenter models.EduCenter
-	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
+	var eduCenter models.CreateEduCenterDto
+	if err := HandleFormDataBinding(c, &eduCenter); err != nil {
 		c.Error(err)
 		return
 	}
-
 	//attaching owner
 	userID := c.MustGet("user_id").(uuid.UUID)
 	eduCenter.OwnerID = userID
@@ -119,23 +118,30 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 	c.JSON(http.StatusOK, eduCenter)
 }
 
-//	Update EduCenter ...
-//  @Summary Update EduCenter
-//	@Description This API for updating eduCenter
-//  @Security BearerAuth
-//  @Tags EduCenter
-//  @Accept json
-//  @Produse json
-//  @Param body body models.EduCenter true "EduCenter"
-//  @Success 200 {object} models.EduCenter
-//  @Failure 400 {object} models.CustomError
-//  @Failure 500 {object} models.CustomError
-//  @Router /api/educenters [PATCH]
+//		Update EduCenter ...
+//	 @Summary Update EduCenter
+//		@Description This API for updating eduCenter
+//	 @Security BearerAuth
+//	 @Tags EduCenter
+//	 @Accept json
+//	 @Produse json
+//	 @Param body body models.EduCenter true "EduCenter"
+//	 @Success 200 {object} models.EduCenter
+//	 @Failure 400 {object} models.CustomError
+//	 @Failure 500 {object} models.CustomError
+//	 @Router /api/educenters [PATCH]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
-	var eduCenter models.EduCenter
-	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
+	var eduCenter models.UpdateEduCenterDto
+	if err := HandleFormDataBinding(c, &eduCenter); err != nil {
+		c.Error(err)
 		return
 	}
+	//get edu Center ID and attaching it
+	eduCenterID, err := GetId(c, h.logger)
+	if err != nil {
+		return
+	}
+	eduCenter.ID = eduCenterID
 
 	updatedEduCenter, err := h.eduCenterService.UpdateEduCenter(eduCenter)
 	if err != nil {
