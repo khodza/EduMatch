@@ -11,7 +11,7 @@ type CourseServiceInterface interface {
 	CreateCourse(course models.Course) (models.Course, error)
 	UpdateCourse(newCourse models.Course) (models.Course, error)
 	GetCourse(id uuid.UUID) (models.Course, error)
-	GetAllCourses() ([]models.Course, error)
+	GetAllCourses() (models.AllCourses, error)
 	DeleteCourse(id string) error
 }
 
@@ -49,12 +49,14 @@ func (s *CourseService) GetCourse(id uuid.UUID) (models.Course, error) {
 	return course, nil
 }
 
-func (s *CourseService) GetAllCourses() ([]models.Course, error) {
+func (s *CourseService) GetAllCourses() (models.AllCourses, error) {
 	courses, err := s.courseRepository.GetAllCourses()
 	if err != nil {
-		return nil, err
+		return models.AllCourses{}, err
 	}
-	return courses, nil
+	return models.AllCourses{
+		Courses: courses,
+	}, nil
 }
 
 func (s *CourseService) DeleteCourse(id string) error {

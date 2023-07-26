@@ -31,6 +31,7 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 // CreateCourse ...
 // @Summary CreateCourse
 // @Description This API for creating course
+// @Security BearerAuth
 // @Tags Course
 // @Accept json
 // @Produce json
@@ -59,6 +60,7 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // UpdateCourse ...
 // @Summary UpdateCourse
 // @Description This API for updating Course
+// @Security BearerAuth
 // @Tags Course
 // @Accept json
 // @Produce json
@@ -137,6 +139,7 @@ func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 // DeleteCourse ...
 // @Summary DeleteCourse
 // @Description This API for deleting Course
+// @Security BearerAuth
 // @Tags Course
 // @Accept json
 // @Produce json

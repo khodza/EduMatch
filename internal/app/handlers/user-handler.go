@@ -11,14 +11,6 @@ import (
 
 type UserHandlerInterface interface {
 	GetUsers(c *gin.Context)
-	// @Summary Get a user by ID
-	// @Description Get a user's details by their ID
-	// @ID get-user-by-id
-	// @Produce json
-	// @Param id path int true "User ID"
-	// @Success 200 {object} UserResponse
-	// @Failure 400 {object} ErrorResponse
-	// @Router /users/{id} [get]
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
@@ -36,6 +28,18 @@ func NewUserHandler(userService services.UserServiceInterface, logger *zap.Logge
 	}
 }
 
+// Create User ...
+// @Summary Create User
+// @Description This API for creating new user
+// @Security BearerAuth
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body models.User true "User_body"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/users/ [POST]
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.userService.GetUsers()
 
@@ -50,17 +54,17 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// @BasePath /api/
-
-// PingExample godoc
-// @Summary ping example
-// @Schemes
-// @Description do ping
-// @Tags example
+// Get User ...
+// @Summary Get User
+// @Description This API for getting userby ID
+// @Tags user
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
-// @Router /example/helloworld [get]
+// @Param id path string true "User_ID"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/users/{id} [GET]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	userID, err := GetId(c, h.logger)
 	if err != nil {
@@ -80,6 +84,19 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// Update User ...
+// @Summary Update User
+// @Description This API for updating user
+// @Security BearerAuth
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path string true "User_ID"
+// @Param body body models.User true "User_body"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/users/{id} [PATCH]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	var user models.UpdateUserDto
 	if err := c.ShouldBind(&user); err != nil {
@@ -101,6 +118,18 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedUser)
 }
 
+// Delete User ..
+// @Summary Delete User
+// @Description This API for deleting user
+// @Security BearerAuth
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path string true "User_ID"
+// @Success 200 {object} models.Empty
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/users/{id} [DELETE]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userID, err := GetId(c, h.logger)
 	if err != nil {

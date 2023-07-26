@@ -28,5 +28,5 @@ type CourseRes struct {
 }
 
 type AllCourses struct {
-	Courses Course `json:"courses"`
+	Courses []Course `json:"courses"`
 }

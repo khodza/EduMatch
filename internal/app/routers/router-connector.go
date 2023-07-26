@@ -10,6 +10,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api := router.Group("/api")
 	docs.SwaggerInfo.BasePath = ""
@@ -20,7 +24,7 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 
 	//users
 	api.GET("/users/", h.AuthHandler.ProtectedEndpoint(models.AdminRole), h.UserHandler.GetUsers)
-	api.PATCH("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
+	api.PATCH("/users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.UpdateUser)
 	api.GET("/users/:id", h.UserHandler.GetUser)
 	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 
@@ -28,8 +32,8 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
 	api.GET("/educenters/", h.EduCenterHandler.GetEduCenters)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
-	api.PATCH("educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
-	api.DELETE("educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
+	api.PATCH("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
+	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
 	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)

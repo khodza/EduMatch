@@ -29,6 +29,17 @@ func NewAuthHandler(authService services.AuthServiceInterface, logger *zap.Logge
 	}
 }
 
+// Sign Up ...
+// @Summary Sign Up
+// @Description This API for Sign up user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.RegUser true "Register_body"
+// @Success 200 {object} models.Tokens
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /auth/signup [POST]
 func (h *AuthHandler) SignUp(c *gin.Context) {
 	var user models.RegUser
 	if err := HandleJSONBinding(c, &user, h.logger); err != nil {
@@ -48,6 +59,17 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
+// Login User ...
+// @Summary Login User
+// @Description This API for loginning user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body models.LoggingUser true "Loggining_User"
+// @Success 200 {object} models.Tokens
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /auth/login [POST]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var loggingUser models.LoggingUser
 	if err := HandleJSONBinding(c, &loggingUser, h.logger); err != nil {
@@ -108,6 +130,7 @@ func (h *AuthHandler) ProtectedEndpoint(roles ...models.Role) gin.HandlerFunc {
 	}
 }
 
+// ! Izzat should give me info about this api
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	refreshToken := c.PostForm("refresh_token")
 	if refreshToken == "" {

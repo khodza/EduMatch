@@ -56,6 +56,7 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 // CreateEduCenter ...
 // @Summary Create Edu Center
 // @Description This API for creating Edu Center
+// @Security BearerAuth
 // @Tags EduCenter
 // @Accept json
 // @Produce json
@@ -121,6 +122,7 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 //	Update EduCenter ...
 //  @Summary Update EduCenter
 //	@Description This API for updating eduCenter
+//  @Security BearerAuth
 //  @Tags EduCenter
 //  @Accept json
 //  @Produse json
@@ -128,7 +130,7 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 //  @Success 200 {object} models.EduCenter
 //  @Failure 400 {object} models.CustomError
 //  @Failure 500 {object} models.CustomError
-//  @Router /api/educenters [PUT]
+//  @Router /api/educenters [PATCH]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	var eduCenter models.EduCenter
 	if err := HandleJSONBinding(c, &eduCenter, h.logger); err != nil {
@@ -150,6 +152,7 @@ func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 // Delete EduCenter ....
 // @Summary Delete EduCenter
 // @Description This API for deleting EduCenter
+// @Security BearerAuth
 // @Tags EduCenter
 // @Accept json
 // @Produce json

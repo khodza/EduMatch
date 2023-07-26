@@ -2,7 +2,9 @@ definitions:
   models.AllCourses:
     properties:
       courses:
-        $ref: '#/definitions/models.Course'
+        items:
+          $ref: '#/definitions/models.Course'
+        type: array
     type: object
   models.AllEduCenters:
     properties:
@@ -60,12 +62,65 @@ definitions:
     type: object
   models.Empty:
     type: object
+  models.LoggingUser:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   models.Point:
     properties:
       latitude:
         type: number
       longitude:
         type: number
+    type: object
+  models.RegUser:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Tokens:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.User:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      password:
+        maxLength: 16
+        minLength: 8
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
     type: object
 info:
   contact: {}
@@ -119,6 +174,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: CreateCourse
       tags:
       - Course
@@ -148,6 +205,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: UpdateCourse
       tags:
       - Course
@@ -177,6 +236,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: DeleteCourse
       tags:
       - Course
@@ -230,6 +291,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: Delete EduCenter
       tags:
       - EduCenter
@@ -261,6 +324,35 @@ paths:
       summary: Get Edu Center
       tags:
       - EduCenter
+    patch:
+      consumes:
+      - application/json
+      description: This API for updating eduCenter
+      parameters:
+      - description: EduCenter
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EduCenter'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduCenter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
+      summary: Update EduCenter
+      tags:
+      - EduCenter
     post:
       consumes:
       - application/json
@@ -287,25 +379,30 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: Create Edu Center
       tags:
       - EduCenter
-    put:
+  /api/users/:
+    post:
       consumes:
       - application/json
-      description: This API for updating eduCenter
+      description: This API for creating new user
       parameters:
-      - description: EduCenter
+      - description: User_body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.EduCenter'
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.EduCenter'
+            $ref: '#/definitions/models.User'
         "400":
           description: Bad Request
           schema:
@@ -314,22 +411,169 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
-      summary: Update EduCenter
+      security:
+      - BearerAuth: []
+      summary: Create User
       tags:
-      - EduCenter
-  /example/helloworld:
-    get:
+      - user
+  /api/users/{id}:
+    delete:
       consumes:
       - application/json
-      description: do ping
+      description: This API for deleting user
+      parameters:
+      - description: User_ID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: ping example
+            $ref: '#/definitions/models.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
+      summary: Delete User
       tags:
-      - example
+      - user
+    get:
+      consumes:
+      - application/json
+      description: This API for getting userby ID
+      parameters:
+      - description: User_ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      summary: Get User
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      description: This API for updating user
+      parameters:
+      - description: User_ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User_body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
+      summary: Update User
+      tags:
+      - user
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: This API for loginning user
+      parameters:
+      - description: Loggining_User
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoggingUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tokens'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      summary: Login User
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: This API for Sign up user
+      parameters:
+      - description: Register_body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tokens'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      summary: Sign Up
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
