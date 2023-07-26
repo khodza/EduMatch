@@ -2,7 +2,9 @@ definitions:
   models.AllCourses:
     properties:
       courses:
-        $ref: '#/definitions/models.Course'
+        items:
+          $ref: '#/definitions/models.Course'
+        type: array
     type: object
   models.AllEduCenters:
     properties:
@@ -172,6 +174,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: CreateCourse
       tags:
       - Course
@@ -201,6 +205,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: UpdateCourse
       tags:
       - Course
@@ -230,6 +236,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: DeleteCourse
       tags:
       - Course
@@ -283,6 +291,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: Delete EduCenter
       tags:
       - EduCenter
@@ -314,6 +324,35 @@ paths:
       summary: Get Edu Center
       tags:
       - EduCenter
+    patch:
+      consumes:
+      - application/json
+      description: This API for updating eduCenter
+      parameters:
+      - description: EduCenter
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EduCenter'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduCenter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
+      summary: Update EduCenter
+      tags:
+      - EduCenter
     post:
       consumes:
       - application/json
@@ -340,34 +379,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.CustomError'
+      security:
+      - BearerAuth: []
       summary: Create Edu Center
-      tags:
-      - EduCenter
-    put:
-      consumes:
-      - application/json
-      description: This API for updating eduCenter
-      parameters:
-      - description: EduCenter
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.EduCenter'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.EduCenter'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.CustomError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.CustomError'
-      summary: Update EduCenter
       tags:
       - EduCenter
   /api/users/:

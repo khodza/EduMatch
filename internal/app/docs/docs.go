@@ -51,6 +51,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This API for updating Course",
                 "consumes": [
                     "application/json"
@@ -95,6 +100,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This API for creating course",
                 "consumes": [
                     "application/json"
@@ -177,6 +187,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This API for deleting Course",
                 "consumes": [
                     "application/json"
@@ -262,48 +277,12 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
-                "description": "This API for updating eduCenter",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "EduCenter"
-                ],
-                "summary": "Update EduCenter",
-                "parameters": [
-                    {
-                        "description": "EduCenter",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.EduCenter"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.EduCenter"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.CustomError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.CustomError"
-                        }
-                    }
-                }
-            },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This API for creating Edu Center",
                 "consumes": [
                     "application/json"
@@ -348,6 +327,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This API for deleting EduCenter",
                 "consumes": [
                     "application/json"
@@ -373,6 +357,52 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.Empty"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This API for updating eduCenter",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EduCenter"
+                ],
+                "summary": "Update EduCenter",
+                "parameters": [
+                    {
+                        "description": "EduCenter",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.EduCenter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.EduCenter"
                         }
                     },
                     "400": {
@@ -686,7 +716,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "courses": {
-                    "$ref": "#/definitions/models.Course"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Course"
+                    }
                 }
             }
         },

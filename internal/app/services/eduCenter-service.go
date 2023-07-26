@@ -10,7 +10,7 @@ import (
 
 type EduCenterServiceInterface interface {
 	CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
-	GetEduCenters() ([]models.EduCenter, error)
+	GetEduCenters() (models.AllEduCenters, error)
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
 	UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
@@ -41,13 +41,15 @@ func (s *EduCenterService) CreateEduCenter(eduCenter models.EduCenter) (models.E
 	return newEduCenter, nil
 }
 
-func (s *EduCenterService) GetEduCenters() ([]models.EduCenter, error) {
+func (s *EduCenterService) GetEduCenters() (models.AllEduCenters, error) {
 	eduCenters, err := s.eduCenterRepository.GetEduCenters()
 	if err != nil {
-		return []models.EduCenter{}, err
+		return models.AllEduCenters{}, err
 	}
 
-	return eduCenters, nil
+	return models.AllEduCenters{
+		EduCenters: eduCenters,
+	}, nil
 }
 
 func (s *EduCenterService) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error) {
