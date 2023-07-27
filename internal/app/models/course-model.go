@@ -30,3 +30,10 @@ type CourseRes struct {
 type AllCourses struct {
 	Courses []Course `json:"courses"`
 }
+
+type RatingCourse struct {
+	ID       uuid.UUID `db:"id"`
+	Score    uint8     `db:"score" validate:"gte=0,lte=5"`
+	OwnerID  uuid.UUID `db:"owner_id"`
+	CourseID uuid.UUID `db:"course_id" json:"course_id"`
+}

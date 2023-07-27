@@ -9,11 +9,12 @@ import (
 )
 
 type EduCenterServiceInterface interface {
-	CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error)
+	CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error)
 	GetEduCenters() (models.AllEduCenters, error)
-	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
-	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
+	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error)
+	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
+	GiveRating(rating models.RatingEdu) error
 }
 type EduCenterService struct {
 	eduCenterRepository repositories.EduCenterRepositoryInterface
@@ -27,26 +28,49 @@ func NewEduCenterService(eduCenterRepository repositories.EduCenterRepositoryInt
 	}
 }
 
-func (s *EduCenterService) CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error) {
+func (s *EduCenterService) CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error) {
 	//validate eduCenter
 	if err := s.validator.ValidateEduCenterCreate(&eduCenter); err != nil {
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
-
+	var imageName string
+	var err error
 	if eduCenter.CoverImage != nil {
-		imageName, err := SaveImage(eduCenter.CoverImage, "cover-images")
+		imageName, err = SaveImage(eduCenter.CoverImage, "cover-images")
 		if err != nil {
-			return models.EduCenter{}, err
+			return models.EduCenterRes{}, err
 		}
 		eduCenter.CoverImageUrl = imageName
 	}
-
-	newEduCenter, err := s.eduCenterRepository.CreateEduCenter(eduCenter)
+	//begin transaction
+	tx, err := s.eduCenterRepository.BeginTransaction()
 	if err != nil {
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
 
-	return newEduCenter, nil
+	defer func() {
+		if err != nil {
+			DeletePhoto(imageName, "cover-images")
+			tx.Rollback()
+		}
+		tx.Commit()
+	}()
+
+	var newEduCenter models.EduCenterRes
+	newEduCenter, err = s.eduCenterRepository.CreateEduCenter(tx, eduCenter)
+	if err != nil {
+		return models.EduCenterRes{}, err
+	}
+
+	var contacts models.Contact
+	contacts, err = s.eduCenterRepository.AddContacts(tx, newEduCenter.ID, eduCenter.Contacts)
+	if err != nil {
+		return models.EduCenterRes{}, err
+	}
+
+	newEduCenter.Contacts = contacts
+
+	return newEduCenter, err
 }
 
 func (s *EduCenterService) GetEduCenters() (models.AllEduCenters, error) {
@@ -60,38 +84,73 @@ func (s *EduCenterService) GetEduCenters() (models.AllEduCenters, error) {
 	}, nil
 }
 
-func (s *EduCenterService) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error) {
+func (s *EduCenterService) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error) {
 	eduCenter, err := s.eduCenterRepository.GetEduCenter(eduCenterID)
 	if err != nil {
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
 
 	return eduCenter, nil
 }
 
-func (s *EduCenterService) UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error) {
+// todo later we should make them in goroutines
+func (s *EduCenterService) UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error) {
 	//todo
 	//should be validated
-
 	eduCenter.CoverImageUrl = eduCenter.OldCoverImage
+	var imageName string
+	var err error
+
 	if eduCenter.CoverImage != nil {
-		fileName, err := SaveImage(eduCenter.CoverImage, "cover-images")
+		imageName, err = SaveImage(eduCenter.CoverImage, "cover-images")
 		if err != nil {
-			return models.EduCenter{}, err
+			return models.EduCenterRes{}, err
 		}
-		eduCenter.CoverImageUrl = fileName
+		eduCenter.CoverImageUrl = imageName
 	}
 
-	updatedProduct, err := s.eduCenterRepository.UpdateEduCenter(eduCenter)
+	tx, err := s.eduCenterRepository.BeginTransaction()
+
 	if err != nil {
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
 
-	return updatedProduct, nil
+	defer func() {
+		if err != nil {
+			DeletePhoto(imageName, "cover-images")
+			tx.Rollback()
+		}
+		tx.Commit()
+	}()
+
+	var updatedEduCenter models.EduCenterRes
+	updatedEduCenter, err = s.eduCenterRepository.UpdateEduCenter(tx, eduCenter)
+	if err != nil {
+		return models.EduCenterRes{}, err
+	}
+	//update contacts
+	var updatedContacts models.Contact
+	updatedContacts, err = s.eduCenterRepository.UpdateContacts(tx, eduCenter.Contacts, eduCenter.ID)
+
+	if err != nil {
+		return models.EduCenterRes{}, err
+	}
+	//attaching updated contacts
+	updatedEduCenter.Contacts = updatedContacts
+
+	return updatedEduCenter, nil
 }
 
 func (s *EduCenterService) DeleteEduCenter(eduCenterID uuid.UUID) error {
 	if err := s.eduCenterRepository.DeleteEduCenter(eduCenterID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *EduCenterService) GiveRating(rating models.RatingEdu) error {
+	if err := s.eduCenterRepository.GiveRating(rating); err != nil {
 		return err
 	}
 

@@ -138,3 +138,13 @@ func SaveImage(Image *multipart.FileHeader, folderName string) (string, error) {
 
 	return avatarFileName, nil
 }
+
+func DeletePhoto(fileName string, folderName string) error {
+	filePath := fmt.Sprintf("./internal/static/%s/%s", folderName, fileName)
+
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
+	database "edumatch/pkg/db"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,10 +14,14 @@ import (
 
 type EduCenterRepositoryInterface interface {
 	GetEduCenters() ([]models.EduCenter, error)
-	CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error)
-	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
-	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
+	CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error)
+	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error)
+	UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
+	GiveRating(rating models.RatingEdu) error
+	BeginTransaction() (database.Transaction, error)
+	AddContacts(tx database.Transaction, eduCenterID uuid.UUID, contacts models.Contact) (models.Contact, error)
+	UpdateContacts(tx database.Transaction, contacts models.Contact, eduCenterID uuid.UUID) (models.Contact, error)
 }
 type EduCenterRepository struct {
 	db *sqlx.DB
@@ -38,14 +43,13 @@ func (r *EduCenterRepository) GetEduCenters() ([]models.EduCenter, error) {
 	return eduCenters, nil
 }
 
-func (r *EduCenterRepository) CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error) {
+func (r *EduCenterRepository) CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error) {
 	query := `
 		INSERT INTO edu_centers (name, html_description, address, location, owner_id, cover_image)
 		VALUES (:name, :html_description, :address, POINT(:latitude, :longitude), :owner_id, :cover_image)
 		RETURNING id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at
 	`
-
-	rows, err := r.db.NamedQuery(query, map[string]interface{}{
+	namedQueryArgs := map[string]interface{}{
 		"name":             eduCenter.Name,
 		"html_description": eduCenter.HtmlDescription,
 		"address":          eduCenter.Address,
@@ -53,45 +57,61 @@ func (r *EduCenterRepository) CreateEduCenter(eduCenter models.CreateEduCenterDt
 		"longitude":        eduCenter.Location.Longitude,
 		"owner_id":         eduCenter.OwnerID,
 		"cover_image":      eduCenter.CoverImageUrl,
-	})
+	}
+	var rows *sqlx.Rows
+	var err error
+
+	if tx != nil {
+		rows, err = tx.NamedQuery(query, namedQueryArgs)
+	} else {
+		rows, err = r.db.NamedQuery(query, namedQueryArgs)
+	}
+
 	if err != nil {
 		pqErr, _ := err.(*pq.Error)
 		if pqErr.Code == "23505" {
 			err = custom_errors.ErrEduCenterExist
 		}
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
 
 	defer rows.Close()
 
 	if rows.Next() {
-		var insertedEduCenter models.EduCenter
+		var insertedEduCenter models.EduCenterRes
 		err := rows.StructScan(&insertedEduCenter)
 		if err != nil {
-			return models.EduCenter{}, err
+			return models.EduCenterRes{}, err
 		}
 		return insertedEduCenter, nil
 	}
 
-	return models.EduCenter{}, err
+	return models.EduCenterRes{}, err
 }
 
-func (r *EduCenterRepository) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error) {
-	var eduCenter models.EduCenter
-	query := "SELECT id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at FROM edu_centers WHERE id = $1 AND deleted_at is null"
+func (r *EduCenterRepository) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error) {
+	var eduCenter models.EduCenterRes
+	query := `SELECT id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at, (SELECT AVG(score) FROM ratings) AS rating FROM edu_centers WHERE id = $1 AND deleted_at is null`
 	err := r.db.Get(&eduCenter, query, eduCenterID)
 	if err != nil {
 		//not found err
 		if err == sql.ErrNoRows {
 			err = custom_errors.ErrEduCenterNotFound
 		}
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
+
+	query = `SELECT instagram,telegram,website,phone_number FROM contacts WHERE edu_center_id = $1`
+	err = r.db.Get(&eduCenter.Contacts, query, eduCenterID)
+	if err != nil {
+		return models.EduCenterRes{}, err
+	}
+
 	return eduCenter, nil
 }
 
 // UpdateEduCenter updates an existing education center and returns the updated object.
-func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error) {
+func (r *EduCenterRepository) UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error) {
 	eduCenter.UpdatedAt = time.Now().UTC()
 	query := `
 		UPDATE edu_centers
@@ -99,8 +119,7 @@ func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.UpdateEduCenterDt
 		WHERE id = :id AND deleted_at is null
 		RETURNING id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at
 	`
-
-	rows, err := r.db.NamedQuery(query, map[string]interface{}{
+	queyArgs := map[string]interface{}{
 		"id":               eduCenter.ID,
 		"name":             eduCenter.Name,
 		"html_description": eduCenter.HtmlDescription,
@@ -109,29 +128,40 @@ func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.UpdateEduCenterDt
 		"longitude":        eduCenter.Location.Longitude,
 		"cover_image":      eduCenter.CoverImageUrl,
 		"updated_at":       eduCenter.UpdatedAt,
-	})
+	}
+	var (
+		rows *sqlx.Rows
+		err  error
+	)
+
+	if tx != nil {
+		rows, err = tx.NamedQuery(query, queyArgs)
+	} else {
+		rows, err = r.db.NamedQuery(query, queyArgs)
+	}
+
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			return models.EduCenter{}, custom_errors.ErrEduCenterExist
+			return models.EduCenterRes{}, custom_errors.ErrEduCenterExist
 		}
 
 		if err == sql.ErrNoRows {
-			return models.EduCenter{}, custom_errors.ErrEduCenterNotFound
+			return models.EduCenterRes{}, custom_errors.ErrEduCenterNotFound
 		}
-		return models.EduCenter{}, err
+		return models.EduCenterRes{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
-		var updatedEduCenter models.EduCenter
+		var updatedEduCenter models.EduCenterRes
 		err := rows.StructScan(&updatedEduCenter)
 		if err != nil {
-			return models.EduCenter{}, err
+			return models.EduCenterRes{}, err
 		}
 		return updatedEduCenter, nil
 	}
 
-	return models.EduCenter{}, err
+	return models.EduCenterRes{}, err
 }
 
 func (r *EduCenterRepository) DeleteEduCenter(eduCenterID uuid.UUID) error {
@@ -141,4 +171,84 @@ func (r *EduCenterRepository) DeleteEduCenter(eduCenterID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (r *EduCenterRepository) GiveRating(rating models.RatingEdu) error {
+	query := `INSERT INTO ratings (score,owner_id,edu_center_id) VALUES ($1,$2,$3)`
+	_, err := r.db.Exec(query, rating.Score, rating.OwnerID, rating.EduCenterID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *EduCenterRepository) BeginTransaction() (database.Transaction, error) {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	return &database.CustomTx{Tx: tx}, nil
+}
+
+func (r *EduCenterRepository) AddContacts(tx database.Transaction, eduCenterID uuid.UUID, contacts models.Contact) (models.Contact, error) {
+	query := `INSERT INTO contacts (instagram,telegram,website,phone_number,edu_center_id) 
+	VALUES(:instagram,:telegram,:website,:phone_number,:edu_center_id) 
+	RETURNING id,instagram,telegram,website,phone_number`
+	namedQueryArgs := map[string]interface{}{
+		"instagram":     contacts.Instagram,
+		"telegram":      contacts.Telegram,
+		"website":       contacts.Website,
+		"phone_number":  contacts.PhoneNumber,
+		"edu_center_id": eduCenterID,
+	}
+	var err error
+	var rows *sqlx.Rows
+	if tx != nil {
+		rows, err = tx.NamedQuery(query, namedQueryArgs)
+	} else {
+		rows, err = r.db.NamedQuery(query, namedQueryArgs)
+	}
+
+	if err != nil {
+		return models.Contact{}, err
+	}
+	defer rows.Close()
+	if rows.Next() {
+		var insertedContacts models.Contact
+		if err = rows.StructScan(&insertedContacts); err != nil {
+			return models.Contact{}, err
+		}
+		return insertedContacts, err
+	}
+	return models.Contact{}, err
+}
+
+func (r *EduCenterRepository) DeleteContacts(tx database.Transaction, eduCenterID uuid.UUID) error {
+	query := `DELETE FROM contacts WHERE edu_center_id=$1`
+	var err error
+	if tx != nil {
+		_, err = tx.Exec(query, eduCenterID)
+	} else {
+		_, err = r.db.Exec(query, eduCenterID)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *EduCenterRepository) UpdateContacts(tx database.Transaction, contacts models.Contact, eduCenterID uuid.UUID) (models.Contact, error) {
+	query := `UPDATE contacts SET instagram=$2,telegram=$3,website=$4,phone_number=$5 WHERE edu_center_id = $1 RETURNING instagram,telegram,website,phone_number`
+	var err error
+	var updatedContacts models.Contact
+	if tx != nil {
+		err = tx.Get(&updatedContacts, query, eduCenterID, contacts.Instagram, contacts.Telegram, contacts.Website, contacts.PhoneNumber)
+	} else {
+		err = r.db.Get(&updatedContacts, query, eduCenterID)
+	}
+	if err != nil {
+		return models.Contact{}, err
+	}
+	return updatedContacts, nil
 }

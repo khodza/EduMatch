@@ -13,6 +13,7 @@ type Transaction interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	Commit() error
 	Rollback() error
+	NamedQuery(query string, arg interface{}) (*sqlx.Rows, error)
 	// Add any additional methods you need here
 }
 
@@ -30,4 +31,8 @@ func (tx *CustomTx) Rollback() error {
 
 func (tx *CustomTx) Get(dest interface{}, query string, args ...interface{}) error {
 	return tx.Tx.Get(dest, query, args...)
+}
+
+func (tx *CustomTx) NamedQuery(query string, arg interface{}) (*sqlx.Rows, error) {
+	return tx.Tx.NamedQuery(query, arg)
 }
