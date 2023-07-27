@@ -9,10 +9,10 @@ import (
 )
 
 type EduCenterServiceInterface interface {
-	CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
+	CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error)
 	GetEduCenters() (models.AllEduCenters, error)
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
-	UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
+	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
 }
 type EduCenterService struct {
@@ -27,10 +27,18 @@ func NewEduCenterService(eduCenterRepository repositories.EduCenterRepositoryInt
 	}
 }
 
-func (s *EduCenterService) CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error) {
-	//validate eduCentr
+func (s *EduCenterService) CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error) {
+	//validate eduCenter
 	if err := s.validator.ValidateEduCenterCreate(&eduCenter); err != nil {
 		return models.EduCenter{}, err
+	}
+
+	if eduCenter.CoverImage != nil {
+		imageName, err := SaveImage(eduCenter.CoverImage, "cover-images")
+		if err != nil {
+			return models.EduCenter{}, err
+		}
+		eduCenter.CoverImageUrl = imageName
 	}
 
 	newEduCenter, err := s.eduCenterRepository.CreateEduCenter(eduCenter)
@@ -61,7 +69,19 @@ func (s *EduCenterService) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter
 	return eduCenter, nil
 }
 
-func (s *EduCenterService) UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error) {
+func (s *EduCenterService) UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error) {
+	//todo
+	//should be validated
+
+	eduCenter.CoverImageUrl = eduCenter.OldCoverImage
+	if eduCenter.CoverImage != nil {
+		fileName, err := SaveImage(eduCenter.CoverImage, "cover-images")
+		if err != nil {
+			return models.EduCenter{}, err
+		}
+		eduCenter.CoverImageUrl = fileName
+	}
+
 	updatedProduct, err := s.eduCenterRepository.UpdateEduCenter(eduCenter)
 	if err != nil {
 		return models.EduCenter{}, err

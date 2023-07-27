@@ -14,24 +14,39 @@ func GetId(c *gin.Context, logger *zap.Logger) (uuid.UUID, error) {
 	ID, err := uuid.Parse(id)
 
 	if err != nil {
-
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Id provided"})
-
 		//logging
-		logger.Error("Invalid Id provided",
+		logger.Error(custom_errors.ErrInvalidID.Error(),
 			zap.String("method", c.Request.Method),
 			zap.String("path", c.Request.URL.Path),
 			zap.Int("status", http.StatusBadRequest),
 			zap.Error(err))
-		return uuid.Nil, err
+		return uuid.Nil, custom_errors.ErrInvalidID
 	}
 	return ID, nil
 }
 
 func HandleJSONBinding(c *gin.Context, target interface{}, logger *zap.Logger) error {
 	if err := c.ShouldBindJSON(&target); err != nil {
-		err = custom_errors.ErrHandleJSONBinding
-		return err
+		//logging
+		logger.Error(custom_errors.ErrHandleBinding.Error(),
+			zap.String("method", c.Request.Method),
+			zap.String("path", c.Request.URL.Path),
+			zap.Int("status", http.StatusBadRequest),
+			zap.Error(err))
+		return custom_errors.ErrHandleBinding
+	}
+	return nil
+}
+
+func HandleFormDataBinding(c *gin.Context, target interface{}, logger *zap.Logger) error {
+	if err := c.ShouldBind(target); err != nil {
+		//logging
+		logger.Error(custom_errors.ErrHandleBinding.Error(),
+			zap.String("method", c.Request.Method),
+			zap.String("path", c.Request.URL.Path),
+			zap.Int("status", http.StatusBadRequest),
+			zap.Error(err))
+		return custom_errors.ErrHandleBinding
 	}
 	return nil
 }

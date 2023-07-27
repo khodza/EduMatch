@@ -68,6 +68,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 func (h *UserHandler) GetUser(c *gin.Context) {
 	userID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -99,10 +100,16 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Router /api/users/{id} [PATCH]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	var user models.UpdateUserDto
-	if err := c.ShouldBind(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
+	if err := HandleFormDataBinding(c, &user, h.logger); err != nil {
+		c.Error(err)
+		return
 	}
-	userID, _ := GetId(c, h.logger)
+
+	userID, err := GetId(c, h.logger)
+	if err != nil {
+		c.Error(err)
+		return
+	}
 	user.ID = userID
 
 	updatedUser, err := h.userService.UpdateUser(user)
@@ -133,6 +140,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 

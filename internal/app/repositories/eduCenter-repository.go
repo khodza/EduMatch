@@ -13,9 +13,9 @@ import (
 
 type EduCenterRepositoryInterface interface {
 	GetEduCenters() ([]models.EduCenter, error)
-	CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
+	CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error)
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
-	UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error)
+	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
 }
 type EduCenterRepository struct {
@@ -38,7 +38,7 @@ func (r *EduCenterRepository) GetEduCenters() ([]models.EduCenter, error) {
 	return eduCenters, nil
 }
 
-func (r *EduCenterRepository) CreateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error) {
+func (r *EduCenterRepository) CreateEduCenter(eduCenter models.CreateEduCenterDto) (models.EduCenter, error) {
 	query := `
 		INSERT INTO edu_centers (name, html_description, address, location, owner_id, cover_image)
 		VALUES (:name, :html_description, :address, POINT(:latitude, :longitude), :owner_id, :cover_image)
@@ -52,7 +52,7 @@ func (r *EduCenterRepository) CreateEduCenter(eduCenter models.EduCenter) (model
 		"latitude":         eduCenter.Location.Latitude,
 		"longitude":        eduCenter.Location.Longitude,
 		"owner_id":         eduCenter.OwnerID,
-		"cover_image":      eduCenter.CoverImage,
+		"cover_image":      eduCenter.CoverImageUrl,
 	})
 	if err != nil {
 		pqErr, _ := err.(*pq.Error)
@@ -91,7 +91,7 @@ func (r *EduCenterRepository) GetEduCenter(eduCenterID uuid.UUID) (models.EduCen
 }
 
 // UpdateEduCenter updates an existing education center and returns the updated object.
-func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.EduCenter) (models.EduCenter, error) {
+func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error) {
 	eduCenter.UpdatedAt = time.Now().UTC()
 	query := `
 		UPDATE edu_centers
@@ -107,7 +107,7 @@ func (r *EduCenterRepository) UpdateEduCenter(eduCenter models.EduCenter) (model
 		"address":          eduCenter.Address,
 		"latitude":         eduCenter.Location.Latitude,
 		"longitude":        eduCenter.Location.Longitude,
-		"cover_image":      eduCenter.CoverImage,
+		"cover_image":      eduCenter.CoverImageUrl,
 		"updated_at":       eduCenter.UpdatedAt,
 	})
 	if err != nil {
