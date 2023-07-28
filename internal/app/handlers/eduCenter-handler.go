@@ -112,7 +112,6 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-
 	//logging
 	LoggingResponse(c, "GetEduCenter", h.logger)
 

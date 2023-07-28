@@ -15,6 +15,7 @@ type CourseHandlerInterface interface {
 	GetCourse(c *gin.Context)
 	GetAllCourses(c *gin.Context)
 	DeleteCourse(c *gin.Context)
+	CreateRatingCourse(c *gin.Context)
 }
 type CourseHandler struct {
 	courseService services.CourseServiceInterface
@@ -164,4 +165,33 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, "Course deleted")
 
+}
+
+// Create Course Rating ...
+// @Summary Create Course Rating
+// @Description This API for creating course rating
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param body body models.CreateCourseRating true "Create_Course_Rating"
+// @Success 200 {object} models.CreateCourseRating
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/courses/rating [POST]
+func (h *CourseHandler) CreateRatingCourse(c *gin.Context) {
+	var newCourseRating models.CreateCourseRating
+	if err := HandleJSONBinding(c, &newCourseRating, h.logger); err != nil {
+		c.Error(err)
+		return
+	}
+
+	rating, err := h.courseService.CreateRatingCourse(newCourseRating)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	LoggingResponse(c, "CreateRating", h.logger)
+
+	c.JSON(http.StatusAccepted, rating)
 }

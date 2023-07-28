@@ -149,6 +149,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/courses/rating": {
+            "post": {
+                "description": "This API for creating course rating",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Create Course Rating",
+                "parameters": [
+                    {
+                        "description": "Create_Course_Rating",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCourseRating"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCourseRating"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/courses/{id}": {
             "get": {
                 "description": "This API for getting Course",
@@ -752,10 +798,29 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "rating": {
+                    "type": "number"
+                },
                 "teacher": {
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateCourseRating": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number",
+                    "maximum": 5,
+                    "minimum": 0
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
