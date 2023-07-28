@@ -31,6 +31,7 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	//eduCenters
 	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
 	api.GET("/educenters/", h.EduCenterHandler.GetEduCenters)
+	api.POST("/educenters/rating", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GiveRating)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
 	api.PATCH("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
 	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)

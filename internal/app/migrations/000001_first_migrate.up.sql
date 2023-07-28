@@ -64,7 +64,7 @@ CREATE TABLE "edu_center_images" (
 CREATE TABLE "ratings" (
     "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     "score" int,
-    "user_id" uuid REFERENCES "users" ("id"),
+    "owner_id" uuid REFERENCES "users" ("id"),
     "edu_center_id" uuid REFERENCES "edu_centers" ("id"),
     "course_id" uuid REFERENCES "courses" ("id"),
     CHECK (

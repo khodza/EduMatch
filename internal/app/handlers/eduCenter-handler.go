@@ -16,6 +16,7 @@ type EduCenterHandlerInterface interface {
 	GetEduCenter(c *gin.Context)
 	UpdateEduCenter(c *gin.Context)
 	DeleteEduCenter(c *gin.Context)
+	GiveRating(c *gin.Context)
 }
 type EduCenterHandler struct {
 	eduCenterService services.EduCenterServiceInterface
@@ -184,4 +185,24 @@ func (h *EduCenterHandler) DeleteEduCenter(c *gin.Context) {
 	LoggingResponse(c, "DeleteEduCenter", h.logger)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Education Center deleted successfully"})
+}
+
+func (h *EduCenterHandler) GiveRating(c *gin.Context) {
+	var rating models.RatingEdu
+	if err := HandleJSONBinding(c, &rating, h.logger); err != nil {
+		c.Error(err)
+		return
+	}
+
+	//attaching owner
+	userID := c.MustGet("user_id").(uuid.UUID)
+	rating.OwnerID = userID
+
+	if err := h.eduCenterService.GiveRating(rating); err != nil {
+		c.Error(err)
+		return
+	}
+	//logging
+	LoggingResponse(c, "GiveRating", h.logger)
+	c.JSON(http.StatusOK, gin.H{"message": "Rating accepted"})
 }
