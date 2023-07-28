@@ -54,7 +54,7 @@ type AllEduCenters struct {
 	EduCenters []EduCenter `json:"edu_centers"`
 }
 
-type RatingEdu struct {
+type EduCenterRating struct {
 	ID          uuid.UUID `db:"id"`
 	Score       uint8     `json:"score" db:"score" validate:"gte=0,lte=5"`
 	OwnerID     uuid.UUID `db:"owner_id"`

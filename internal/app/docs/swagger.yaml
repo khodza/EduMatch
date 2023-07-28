@@ -25,9 +25,22 @@ definitions:
         type: string
       name:
         type: string
+      rating:
+        type: number
       teacher:
         type: string
       updated_at:
+        type: string
+    type: object
+  models.CreateCourseRating:
+    properties:
+      course_id:
+        type: string
+      score:
+        maximum: 5
+        minimum: 0
+        type: number
+      user_id:
         type: string
     type: object
   models.CustomError:
@@ -263,6 +276,36 @@ paths:
           schema:
             $ref: '#/definitions/models.CustomError'
       summary: GetCourse
+      tags:
+      - Course
+  /api/courses/rating:
+    post:
+      consumes:
+      - application/json
+      description: This API for creating course rating
+      parameters:
+      - description: Create_Course_Rating
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCourseRating'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateCourseRating'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      summary: Create Course Rating
       tags:
       - Course
   /api/educenters:

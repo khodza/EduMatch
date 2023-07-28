@@ -18,7 +18,7 @@ type EduCenterRepositoryInterface interface {
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error)
 	UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
-	GiveRating(rating models.RatingEdu) error
+	GiveRating(rating models.EduCenterRating) error
 	BeginTransaction() (database.Transaction, error)
 	AddContacts(tx database.Transaction, eduCenterID uuid.UUID, contacts models.Contact) (models.Contact, error)
 	UpdateContacts(tx database.Transaction, contacts models.Contact, eduCenterID uuid.UUID) (models.Contact, error)
@@ -173,7 +173,7 @@ func (r *EduCenterRepository) DeleteEduCenter(eduCenterID uuid.UUID) error {
 	return nil
 }
 
-func (r *EduCenterRepository) GiveRating(rating models.RatingEdu) error {
+func (r *EduCenterRepository) GiveRating(rating models.EduCenterRating) error {
 	query := `INSERT INTO ratings (score,owner_id,edu_center_id) VALUES ($1,$2,$3)`
 	_, err := r.db.Exec(query, rating.Score, rating.OwnerID, rating.EduCenterID)
 	if err != nil {

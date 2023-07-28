@@ -42,6 +42,7 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.GET("/courses/", h.CourseHandler.GetAllCourses)
 	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
 	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
+	api.POST("/courses/rating", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.GiveRating)
 
 	url := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))

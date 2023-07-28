@@ -17,6 +17,7 @@ type CourseRepositoryInterface interface {
 	GetCourse(courseID uuid.UUID) (models.Course, error)
 	UpdateCourse(newCourse models.Course) (models.Course, error)
 	DeleteCourse(courseID string) error
+	GiveRating(rating models.CourseRating) (models.CourseRating, error)
 }
 
 type CourseRepository struct {
@@ -46,8 +47,9 @@ func (r *CourseRepository) CreateCourse(course models.Course) (models.Course, er
 func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) {
 	var (
 		course    models.Course
-		query     = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at  FROM courses WHERE id=$1 AND deleted_at is null`
+		query     = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at,(SELECT  ROUND(AVG(score),1) AS score FROM ratings WHERE course_id=$1 GROUP BY course_id) AS rating FROM courses WHERE id=$1 AND deleted_at is null`
 		update_at sql.NullTime
+		rating    sql.NullFloat64
 	)
 
 	if err := r.db.QueryRow(query, courseID).Scan(
@@ -58,6 +60,7 @@ func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) 
 		&course.EduCenterID,
 		&course.CreatedAt,
 		&update_at,
+		&rating,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			err = custom_errors.ErrCourseNotFound
@@ -67,6 +70,9 @@ func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) 
 	if update_at.Valid {
 		course.UpdatedAt = update_at.Time
 	}
+	if rating.Valid {
+		course.Rating = rating.Float64
+	}
 
 	return course, nil
 }
@@ -74,7 +80,7 @@ func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) 
 func (r *CourseRepository) GetAllCourses() ([]models.Course, error) {
 	var (
 		courses []models.Course
-		query   = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at  FROM courses WHERE deleted_at is null`
+		query   = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at,(SELECT  ROUND(AVG(score),1) AS score FROM ratings WHERE course_id=$1 GROUP BY course_id) AS rating FROM courses WHERE deleted_at is null`
 	)
 
 	rows, err := r.db.Query(query)
@@ -85,6 +91,7 @@ func (r *CourseRepository) GetAllCourses() ([]models.Course, error) {
 		var (
 			updated_at sql.NullTime
 			course     models.Course
+			rating     sql.NullFloat64
 		)
 		err := rows.Scan(
 			&course.ID,
@@ -94,6 +101,7 @@ func (r *CourseRepository) GetAllCourses() ([]models.Course, error) {
 			&course.EduCenterID,
 			&course.CreatedAt,
 			&updated_at,
+			&rating,
 		)
 		if err != nil {
 			return nil, err
@@ -101,6 +109,9 @@ func (r *CourseRepository) GetAllCourses() ([]models.Course, error) {
 
 		if updated_at.Valid {
 			course.UpdatedAt = updated_at.Time
+		}
+		if rating.Valid {
+			course.Rating = rating.Float64
 		}
 
 		courses = append(courses, course)
@@ -138,4 +149,19 @@ func (r *CourseRepository) DeleteCourse(courseID string) error {
 	}
 
 	return nil
+}
+
+func (r *CourseRepository) GiveRating(rating models.CourseRating) (models.CourseRating, error) {
+	var (
+		query     = `INSERT INTO ratings (score, owner_id, course_id) VALUES ($1,$2,$3) RETURNING score,user_id,course_id`
+		newRating models.CourseRating
+	)
+
+	err := r.db.Get(&newRating, query, rating.Score, rating.OwnerID, rating.CourseID)
+	if err != nil {
+		return models.CourseRating{}, err
+	}
+
+	return newRating, nil
+
 }

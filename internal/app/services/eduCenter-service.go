@@ -14,7 +14,7 @@ type EduCenterServiceInterface interface {
 	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error)
 	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
-	GiveRating(rating models.RatingEdu) error
+	GiveRating(rating models.EduCenterRating) error
 }
 type EduCenterService struct {
 	eduCenterRepository repositories.EduCenterRepositoryInterface
@@ -149,7 +149,7 @@ func (s *EduCenterService) DeleteEduCenter(eduCenterID uuid.UUID) error {
 	return nil
 }
 
-func (s *EduCenterService) GiveRating(rating models.RatingEdu) error {
+func (s *EduCenterService) GiveRating(rating models.EduCenterRating) error {
 	if err := s.eduCenterRepository.GiveRating(rating); err != nil {
 		return err
 	}

@@ -113,7 +113,6 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-
 	//logging
 	LoggingResponse(c, "GetEduCenter", h.logger)
 
@@ -188,7 +187,7 @@ func (h *EduCenterHandler) DeleteEduCenter(c *gin.Context) {
 }
 
 func (h *EduCenterHandler) GiveRating(c *gin.Context) {
-	var rating models.RatingEdu
+	var rating models.EduCenterRating
 	if err := HandleJSONBinding(c, &rating, h.logger); err != nil {
 		c.Error(err)
 		return
