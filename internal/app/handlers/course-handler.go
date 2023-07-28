@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -15,7 +16,7 @@ type CourseHandlerInterface interface {
 	GetCourse(c *gin.Context)
 	GetAllCourses(c *gin.Context)
 	DeleteCourse(c *gin.Context)
-	CreateRatingCourse(c *gin.Context)
+	GiveRating(c *gin.Context)
 }
 type CourseHandler struct {
 	courseService services.CourseServiceInterface
@@ -44,6 +45,7 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var course models.Course
 	if err := HandleJSONBinding(c, &course, h.logger); err != nil {
+		c.Error(err)
 		return
 	}
 	createdUser, err := h.courseService.CreateCourse(course)
@@ -102,6 +104,7 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 func (h *CourseHandler) GetCourse(c *gin.Context) {
 	courseID, err := GetId(c, h.logger)
 	if err != nil {
+		c.Error(err)
 		return
 	}
 	course, err := h.courseService.GetCourse(courseID)
@@ -178,20 +181,24 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 // @Failure 400 {object} models.CustomError
 // @Failure 500 {object} models.CustomError
 // @Router /api/courses/rating [POST]
-func (h *CourseHandler) CreateRatingCourse(c *gin.Context) {
-	var newCourseRating models.CreateCourseRating
+func (h *CourseHandler) GiveRating(c *gin.Context) {
+	var newCourseRating models.CourseRating
 	if err := HandleJSONBinding(c, &newCourseRating, h.logger); err != nil {
 		c.Error(err)
 		return
 	}
 
-	rating, err := h.courseService.CreateRatingCourse(newCourseRating)
+	//get and add attach user
+	userID := c.MustGet("user_id").(uuid.UUID)
+	newCourseRating.OwnerID = userID
+
+	rating, err := h.courseService.GiveRating(newCourseRating)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	LoggingResponse(c, "CreateRating", h.logger)
+	LoggingResponse(c, "GiveRating", h.logger)
 
 	c.JSON(http.StatusAccepted, rating)
 }

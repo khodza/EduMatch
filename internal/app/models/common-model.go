@@ -6,13 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Rating struct {
-	ID          uuid.UUID `db:"id"`
-	Score       int       `db:"score"`
-	UserID      int       `db:"user_id"`
-	EduCenterID int       `db:"edu_center_id"`
-}
-
 type Point struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
@@ -41,7 +34,7 @@ func (p *Point) Scan(value interface{}) error {
 }
 
 type Contact struct {
-	ID          uuid.UUID `json:"id" db:"id"`
+	ID          uuid.UUID `json:"-" db:"id"`
 	Instagram   string    `json:"instagram" db:"instagram"`
 	Telegram    string    `json:"telegram" db:"telegram"`
 	Website     string    `json:"website" db:"website"`

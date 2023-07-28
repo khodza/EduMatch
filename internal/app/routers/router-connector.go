@@ -31,8 +31,9 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	//eduCenters
 	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
 	api.GET("/educenters/", h.EduCenterHandler.GetEduCenters)
+	api.POST("/educenters/rating", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GiveRating)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
-	api.PATCH("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
+	api.PATCH("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
 	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
@@ -41,7 +42,7 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.GET("/courses/", h.CourseHandler.GetAllCourses)
 	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
 	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
-	api.POST("/courses/rating", h.CourseHandler.CreateRatingCourse)
+	api.POST("/courses/rating", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.GiveRating)
 
 	url := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))

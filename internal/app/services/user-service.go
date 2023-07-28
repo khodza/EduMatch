@@ -90,6 +90,8 @@ func (s *UserService) UpdateUser(user models.UpdateUserDto) (models.User, error)
 	if err := s.validator.ValidateUserUpdate(&user); err != nil {
 		return models.User{}, err
 	}
+	//if there is no avatar keep old one
+	user.AvatarUrl = user.OldAvatar
 
 	if user.Avatar != nil {
 		fileName, err := SaveImage(user.Avatar, "avatars")

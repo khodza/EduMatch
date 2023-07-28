@@ -32,20 +32,9 @@ type AllCourses struct {
 	Courses []Course `json:"courses"`
 }
 
-type CreateCourseRating struct {
-	Score    float64   `json:"score" db:"score" validate:"min=0,max=5"`
-	UserID   uuid.UUID `json:"user_id" db:"user_id"`
-	CourseId uuid.UUID `json:"course_id" db:"course_id"`
-}
-
-type ScoreCourse struct {
-	Score    float64   `json:"score" db:"score" validate:"min=0,max=5"`
-	CourseId uuid.UUID `json:"course_id" db:"course_id"`
-}
-
 type CourseRating struct {
-	ID       uuid.UUID `json:"id" db:"id"`
-	Score    float64   `json:"score" db:"score" validate:"min=0,max=5"`
-	UserID   uuid.UUID `json:"user_id" db:"user_id"`
-	CourseId uuid.UUID `json:"course_id" db:"course_id"`
+	ID       uuid.UUID `json:"-" db:"id"`
+	Score    uint8     `json:"score" db:"score" validate:"gte=0,lte=5"`
+	OwnerID  uuid.UUID `json:"-" db:"owner_id"`
+	CourseID uuid.UUID `json:"course_id" db:"course_id"`
 }

@@ -17,7 +17,7 @@ type CourseRepositoryInterface interface {
 	GetCourse(courseID uuid.UUID) (models.Course, error)
 	UpdateCourse(newCourse models.Course) (models.Course, error)
 	DeleteCourse(courseID string) error
-	CreateRatingCourse(rating models.CreateCourseRating) (models.CourseRating, error)
+	GiveRating(rating models.CourseRating) (models.CourseRating, error)
 }
 
 type CourseRepository struct {
@@ -151,13 +151,13 @@ func (r *CourseRepository) DeleteCourse(courseID string) error {
 	return nil
 }
 
-func (r *CourseRepository) CreateRatingCourse(rating models.CreateCourseRating) (models.CourseRating, error) {
+func (r *CourseRepository) GiveRating(rating models.CourseRating) (models.CourseRating, error) {
 	var (
-		query     = `INSERT INTO ratings (score, user_id, course_id) VALUES ($1,$2,$3) RETURNING id,score,user_id,course_id`
+		query     = `INSERT INTO ratings (score, owner_id, course_id) VALUES ($1,$2,$3) RETURNING score,user_id,course_id`
 		newRating models.CourseRating
 	)
 
-	err := r.db.Get(&newRating, query, rating.Score, rating.UserID, rating.CourseId)
+	err := r.db.Get(&newRating, query, rating.Score, rating.OwnerID, rating.CourseID)
 	if err != nil {
 		return models.CourseRating{}, err
 	}

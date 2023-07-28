@@ -13,7 +13,7 @@ type CourseServiceInterface interface {
 	GetCourse(id uuid.UUID) (models.Course, error)
 	GetAllCourses() (models.AllCourses, error)
 	DeleteCourse(id string) error
-	CreateRatingCourse(rating models.CreateCourseRating) (models.CourseRating, error)
+	GiveRating(rating models.CourseRating) (models.CourseRating, error)
 }
 
 type CourseService struct {
@@ -67,8 +67,8 @@ func (s *CourseService) DeleteCourse(id string) error {
 	return nil
 }
 
-func (s *CourseService) CreateRatingCourse(rating models.CreateCourseRating) (models.CourseRating, error) {
-	courseRating, err := s.courseRepository.CreateRatingCourse(rating)
+func (s *CourseService) GiveRating(rating models.CourseRating) (models.CourseRating, error) {
+	courseRating, err := s.courseRepository.GiveRating(rating)
 	if err != nil {
 		return models.CourseRating{}, err
 	}

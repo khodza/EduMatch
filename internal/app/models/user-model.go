@@ -35,5 +35,6 @@ type UpdateUserDto struct {
 	Username  string                `db:"username"  form:"username"`
 	Avatar    *multipart.FileHeader `form:"avatar" db:"-"`
 	AvatarUrl string                `db:"avatar"`
+	OldAvatar string                `form:"old_avatar"`
 	UpdatedAt time.Time             `json:"updated_at" db:"updated_at"`
 }
