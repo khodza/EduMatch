@@ -74,3 +74,27 @@ type EduCenterRes struct {
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }
+
+type EduCenterWithLocation struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longtitude"`
+	Distance  float64 `json:"distance"`
+	Limit     int     `json:"limit"`
+	Offset    int     `json:"offset"`
+}
+
+type EduCentersWithLocation struct {
+	ID              uuid.UUID `json:"id" db:"id"`
+	Name            string    `json:"name" db:"name" validate:"required"`
+	HtmlDescription string    `json:"html_description" db:"html_description"`
+	Address         string    `json:"address" db:"address"`
+	Location        Point     `json:"location" db:"location" binding:"required"`
+	OwnerID         uuid.UUID `json:"owner_id" db:"owner_id"`
+	Distance        float64   `json:"distance" db:"distance"`
+	CreatedAt       time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
+}
+
+type EduAllCentersWithLocation struct {
+	EduCenters []EduCentersWithLocation `json:"educenters"`
+}

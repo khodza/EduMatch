@@ -157,7 +157,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateCourseRating"
+                            "$ref": "#/definitions/models.CourseRating"
                         }
                     }
                 ],
@@ -165,7 +165,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateCourseRating"
+                            "$ref": "#/definitions/models.CourseRating"
                         }
                     },
                     "400": {
@@ -437,6 +437,52 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.EduCenter"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.CustomError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/educenters/location": {
+            "post": {
+                "description": "This API for getting educenters by location",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EduCenter"
+                ],
+                "summary": "Get EduCenter By Location",
+                "parameters": [
+                    {
+                        "description": "EduCenter_Location",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.EduCenterWithLocation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.EduAllCentersWithLocation"
                         }
                     },
                     "400": {
@@ -797,19 +843,16 @@
                 }
             }
         },
-        "models.CreateCourseRating": {
+        "models.CourseRating": {
             "type": "object",
             "properties": {
                 "course_id": {
                     "type": "string"
                 },
                 "score": {
-                    "type": "number",
+                    "type": "integer",
                     "maximum": 5,
                     "minimum": 0
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
@@ -824,9 +867,21 @@
                 }
             }
         },
+        "models.EduAllCentersWithLocation": {
+            "type": "object",
+            "properties": {
+                "educenters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.EduCentersWithLocation"
+                    }
+                }
+            }
+        },
         "models.EduCenter": {
             "type": "object",
             "required": [
+                "location",
                 "name"
             ],
             "properties": {
@@ -838,6 +893,62 @@
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "html_description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/models.Point"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.EduCenterWithLocation": {
+            "type": "object",
+            "properties": {
+                "distance": {
+                    "type": "number"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "longtitude": {
+                    "type": "number"
+                },
+                "offset": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.EduCentersWithLocation": {
+            "type": "object",
+            "required": [
+                "location",
+                "name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "distance": {
+                    "type": "number"
                 },
                 "html_description": {
                     "type": "string"
