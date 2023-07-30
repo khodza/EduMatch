@@ -15,10 +15,10 @@ import (
 )
 
 type EduCenterRepositoryInterface interface {
-	GetEduCenters() ([]models.EduCenter, error)
-	CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error)
-	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error)
-	UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error)
+	GetAllEduCenters() (models.AllEduCenters, error)
+	CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenter, error)
+	GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error)
+	UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
 	GiveRating(rating models.EduCenterRating) error
 	BeginTransaction() (database.Transaction, error)
@@ -36,17 +36,64 @@ func NewEduCenterRepository(db *sqlx.DB) EduCenterRepositoryInterface {
 	}
 }
 
-func (r *EduCenterRepository) GetEduCenters() ([]models.EduCenter, error) {
-	var eduCenters []models.EduCenter
-	query := "SELECT id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at FROM edu_centers WHERE deleted_at is null"
-	err := r.db.Select(&eduCenters, query)
+func (r *EduCenterRepository) GetAllEduCenters() (models.AllEduCenters, error) {
+	var allEduCenters models.AllEduCenters
+	query := `WITH edu_centers_with_rating_with_contacts AS (
+		SELECT e.id, e.name, e.html_description, e.address, e.location, e.owner_id, e.cover_image, e.created_at, e.updated_at,
+		COALESCE(ROUND(AVG(r.score), 1), 0) AS rating,
+		COALESCE(c.instagram, 'default_instagram_value') AS instagram,
+		COALESCE(c.telegram, 'default_telegram_value') AS telegram,
+		COALESCE(c.phone_number, 'default_phone_number_value') AS phone_number,
+		COALESCE(c.website, 'default_website_value') AS website
+		FROM edu_centers e
+		LEFT JOIN ratings r ON e.id = r.edu_center_id
+		LEFT JOIN contacts c ON e.id = c.edu_center_id
+		WHERE e.deleted_at IS NULL
+		GROUP BY e.id, c.instagram, c.telegram, c.phone_number, c.website
+	)
+	SELECT *, COUNT(*) OVER () as count FROM edu_centers_with_rating_with_contacts;
+	`
+
+	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, err
+		return models.AllEduCenters{}, err
 	}
-	return eduCenters, nil
+	defer rows.Close()
+
+	for rows.Next() {
+		var eduCenter models.EduCenter
+		err := rows.Scan(
+			&eduCenter.ID,
+			&eduCenter.Name,
+			&eduCenter.HtmlDescription,
+			&eduCenter.Address,
+			&eduCenter.Location,
+			&eduCenter.OwnerID,
+			&eduCenter.CoverImage,
+			&eduCenter.CreatedAt,
+			&eduCenter.UpdatedAt,
+			&eduCenter.Rating,
+			&eduCenter.Contacts.Instagram,
+			&eduCenter.Contacts.Telegram,
+			&eduCenter.Contacts.PhoneNumber,
+			&eduCenter.Contacts.Website,
+			&allEduCenters.Count,
+		)
+		if err != nil {
+			return models.AllEduCenters{}, err
+		}
+
+		allEduCenters.EduCenters = append(allEduCenters.EduCenters, eduCenter)
+	}
+
+	if err := rows.Err(); err != nil {
+		return models.AllEduCenters{}, err
+	}
+
+	return allEduCenters, nil
 }
 
-func (r *EduCenterRepository) CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenterRes, error) {
+func (r *EduCenterRepository) CreateEduCenter(tx database.Transaction, eduCenter models.CreateEduCenterDto) (models.EduCenter, error) {
 	query := `
 		INSERT INTO edu_centers (name, html_description, address, location, owner_id, cover_image)
 		VALUES (:name, :html_description, :address, POINT(:latitude, :longitude), :owner_id, :cover_image)
@@ -71,57 +118,101 @@ func (r *EduCenterRepository) CreateEduCenter(tx database.Transaction, eduCenter
 	}
 
 	if err != nil {
-		pqErr, _ := err.(*pq.Error)
-		if pqErr.Code == "23505" {
-			err = custom_errors.ErrEduCenterExist
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return models.EduCenter{}, custom_errors.ErrEduCenterExist
 		}
-		return models.EduCenterRes{}, err
+		return models.EduCenter{}, err
 	}
 
 	defer rows.Close()
-
-	if rows.Next() {
-		var insertedEduCenter models.EduCenterRes
-		err := rows.StructScan(&insertedEduCenter)
-		if err != nil {
-			return models.EduCenterRes{}, err
+	var createdEduCenter models.EduCenter
+	for rows.Next() {
+		scanErr := rows.Scan(
+			&createdEduCenter.ID,
+			&createdEduCenter.Name,
+			&createdEduCenter.HtmlDescription,
+			&createdEduCenter.Address,
+			&createdEduCenter.Location,
+			&createdEduCenter.OwnerID,
+			&createdEduCenter.CoverImage,
+			&createdEduCenter.CreatedAt,
+			&createdEduCenter.UpdatedAt,
+		)
+		if scanErr != nil {
+			return models.EduCenter{}, scanErr
 		}
-		return insertedEduCenter, nil
 	}
 
-	return models.EduCenterRes{}, err
+	err = rows.Err()
+	if err != nil {
+		return models.EduCenter{}, err
+	}
+
+	return createdEduCenter, nil
 }
 
-func (r *EduCenterRepository) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenterRes, error) {
-	var eduCenter models.EduCenterRes
-	query := `SELECT id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at, (SELECT AVG(score) FROM ratings) AS rating FROM edu_centers WHERE id = $1 AND deleted_at is null`
-	err := r.db.Get(&eduCenter, query, eduCenterID)
+func (r *EduCenterRepository) GetEduCenter(eduCenterID uuid.UUID) (models.EduCenter, error) {
+	query := `SELECT e.id, e.name, e.html_description, e.address, e.location, e.owner_id, e.cover_image,e.created_at,e.updated_at, COALESCE(ROUND(AVG(r.score),1),0) AS rating, c.instagram,c.telegram,c.website,c.phone_number 
+	FROM edu_centers e 
+	LEFT JOIN ratings r ON e.id = r.edu_center_id 
+	LEFT JOIN contacts  c ON e.id = c.edu_center_id
+	WHERE e.id = $1 AND e.deleted_at IS NULL 
+	GROUP BY e.id,c.id`
+	rows, err := r.db.Query(query, eduCenterID)
 	if err != nil {
-		//not found err
+		return models.EduCenter{}, err
+	}
+	defer rows.Close()
+
+	var eduCenter models.EduCenter
+	if rows.Next() {
+		scanErr := rows.Scan(
+			&eduCenter.ID,
+			&eduCenter.Name,
+			&eduCenter.HtmlDescription,
+			&eduCenter.Address,
+			&eduCenter.Location,
+			&eduCenter.OwnerID,
+			&eduCenter.CoverImage,
+			&eduCenter.CreatedAt,
+			&eduCenter.UpdatedAt,
+			&eduCenter.Rating,
+			&eduCenter.Contacts.Instagram,
+			&eduCenter.Contacts.Telegram,
+			&eduCenter.Contacts.Website,
+			&eduCenter.Contacts.PhoneNumber,
+		)
+		if scanErr != nil {
+			return models.EduCenter{}, scanErr
+		}
+	}
+
+	err = rows.Err()
+	if err != nil {
 		if err == sql.ErrNoRows {
 			err = custom_errors.ErrEduCenterNotFound
 		}
-		return models.EduCenterRes{}, err
-	}
-
-	query = `SELECT instagram,telegram,website,phone_number FROM contacts WHERE edu_center_id = $1`
-	err = r.db.Get(&eduCenter.Contacts, query, eduCenterID)
-	if err != nil {
-		return models.EduCenterRes{}, err
+		return models.EduCenter{}, err
 	}
 
 	return eduCenter, nil
 }
 
-// UpdateEduCenter updates an existing education center and returns the updated object.
-func (r *EduCenterRepository) UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenterRes, error) {
+func (r *EduCenterRepository) UpdateEduCenter(tx database.Transaction, eduCenter models.UpdateEduCenterDto) (models.EduCenter, error) {
 	eduCenter.UpdatedAt = time.Now().UTC()
 	query := `
-		UPDATE edu_centers
-		SET name = :name, html_description = :html_description, address = :address, location = POINT(:latitude, :longitude), cover_image = :cover_image, updated_at = :updated_at
-		WHERE id = :id AND deleted_at is null
-		RETURNING id, name, html_description, address, location, owner_id, cover_image,created_at,updated_at
-	`
+	UPDATE edu_centers
+	SET name = :name,
+    html_description = :html_description,
+    address = :address,
+    location = POINT(:latitude, :longitude),
+    cover_image = :cover_image,
+    updated_at = :updated_at
+	WHERE id = :id AND deleted_at IS NULL
+	RETURNING id, name, html_description, address, location, owner_id, cover_image, 
+	(SELECT COALESCE(ROUND(AVG(score), 1), 0) FROM ratings WHERE edu_center_id = :id) AS rating,
+	created_at, updated_at;
+`
 	queyArgs := map[string]interface{}{
 		"id":               eduCenter.ID,
 		"name":             eduCenter.Name,
@@ -145,26 +236,37 @@ func (r *EduCenterRepository) UpdateEduCenter(tx database.Transaction, eduCenter
 
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			return models.EduCenterRes{}, custom_errors.ErrEduCenterExist
+			return models.EduCenter{}, custom_errors.ErrEduCenterExist
 		}
 
 		if err == sql.ErrNoRows {
-			return models.EduCenterRes{}, custom_errors.ErrEduCenterNotFound
+			return models.EduCenter{}, custom_errors.ErrEduCenterNotFound
 		}
-		return models.EduCenterRes{}, err
+		return models.EduCenter{}, err
 	}
-	defer rows.Close()
 
+	defer rows.Close()
+	var updatedEduCenter models.EduCenter
 	if rows.Next() {
-		var updatedEduCenter models.EduCenterRes
-		err := rows.StructScan(&updatedEduCenter)
-		if err != nil {
-			return models.EduCenterRes{}, err
+		scanErr := rows.Scan(
+			&updatedEduCenter.ID,
+			&updatedEduCenter.Name,
+			&updatedEduCenter.HtmlDescription,
+			&updatedEduCenter.Address,
+			&updatedEduCenter.Location,
+			&updatedEduCenter.OwnerID,
+			&updatedEduCenter.CoverImage,
+			&updatedEduCenter.Rating,
+			&updatedEduCenter.CreatedAt,
+			&updatedEduCenter.UpdatedAt,
+		)
+		if scanErr != nil {
+			return models.EduCenter{}, err
 		}
 		return updatedEduCenter, nil
 	}
 
-	return models.EduCenterRes{}, err
+	return models.EduCenter{}, err
 }
 
 func (r *EduCenterRepository) DeleteEduCenter(eduCenterID uuid.UUID) error {

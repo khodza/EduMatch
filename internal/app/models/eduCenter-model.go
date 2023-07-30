@@ -15,6 +15,8 @@ type EduCenter struct {
 	Location        Point     `json:"location" db:"location" binding:"required"`
 	OwnerID         uuid.UUID `json:"owner_id" db:"owner_id"`
 	CoverImage      string    `json:"cover_image" db:"cover_image"`
+	Rating          float64   `json:"rating" db:"rating"`
+	Contacts        Contact   `json:"contacts"`
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -51,6 +53,7 @@ type EduCenterImages struct {
 }
 
 type AllEduCenters struct {
+	Count      int         `json:"count" db:"count"`
 	EduCenters []EduCenter `json:"edu_centers"`
 }
 
@@ -59,20 +62,6 @@ type EduCenterRating struct {
 	Score       uint8     `json:"score" db:"score" validate:"gte=0,lte=5"`
 	OwnerID     uuid.UUID `db:"owner_id"`
 	EduCenterID uuid.UUID `json:"edu_center_id" db:"edu_center_id"`
-}
-
-type EduCenterRes struct {
-	ID              uuid.UUID `json:"id" db:"id"`
-	Name            string    `json:"name" db:"name" validate:"required"`
-	HtmlDescription string    `json:"html_description" db:"html_description"`
-	Address         string    `json:"address" db:"address"`
-	Location        Point     `json:"location" db:"location" binding:"required"`
-	OwnerID         uuid.UUID `json:"owner_id" db:"owner_id"`
-	CoverImage      string    `json:"cover_image" db:"cover_image"`
-	Contacts        Contact   `json:"contacts" db:"contacts"`
-	Rating          float64   `json:"rating" db:"rating"`
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type EduCenterWithLocation struct {
