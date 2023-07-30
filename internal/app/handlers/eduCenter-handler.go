@@ -17,6 +17,7 @@ type EduCenterHandlerInterface interface {
 	UpdateEduCenter(c *gin.Context)
 	DeleteEduCenter(c *gin.Context)
 	GiveRating(c *gin.Context)
+	GetEduCenterByLocation(c *gin.Context)
 }
 type EduCenterHandler struct {
 	eduCenterService services.EduCenterServiceInterface
@@ -121,7 +122,7 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 
 //		Update EduCenter ...
 //	 @Summary Update EduCenter
-//		@Description This API for updating eduCenter
+//	@Description This API for updating eduCenter
 //	 @Security BearerAuth
 //	 @Tags EduCenter
 //	 @Accept json
@@ -204,4 +205,35 @@ func (h *EduCenterHandler) GiveRating(c *gin.Context) {
 	//logging
 	LoggingResponse(c, "GiveRating", h.logger)
 	c.JSON(http.StatusOK, gin.H{"message": "Rating accepted"})
+}
+
+// GetEduCenterByLocation(location models.EduCenterWithLocation) (models.EduAllCentersWithLocation, error)
+// Get EduCenter By Location
+// @Summary Get EduCenter By Location
+// @Description This API for getting educenters by location
+// @Tags EduCenter
+// @Accept json
+// @Produce json
+// @Param body body models.EduCenterWithLocation true "EduCenter_Location"
+// @Success 200 {object} models.EduAllCentersWithLocation
+// @Failure 400 {object} models.CustomError
+// @Failure 500 {object} models.CustomError
+// @Router /api/educenters/location [POST]
+func (h *EduCenterHandler) GetEduCenterByLocation(c *gin.Context) {
+	var location models.EduCenterWithLocation
+
+	err := HandleFormDataBinding(c, &location, h.logger)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	eduCenters, err := h.eduCenterService.GetEduCenterByLocation(location)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	LoggingResponse(c, "GetEduCenterByLocation", h.logger)
+
+	c.JSON(http.StatusAccepted, eduCenters)
 }

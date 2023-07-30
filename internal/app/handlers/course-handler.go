@@ -176,8 +176,8 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 // @Tags Course
 // @Accept json
 // @Produce json
-// @Param body body models.CreateCourseRating true "Create_Course_Rating"
-// @Success 200 {object} models.CreateCourseRating
+// @Param body body models.CourseRating true "Create_Course_Rating"
+// @Success 200 {object} models.CourseRating
 // @Failure 400 {object} models.CustomError
 // @Failure 500 {object} models.CustomError
 // @Router /api/courses/rating [POST]

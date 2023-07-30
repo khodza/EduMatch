@@ -5,11 +5,13 @@ import (
 	custom_errors "edumatch/internal/app/errors"
 	"edumatch/internal/app/models"
 	database "edumatch/pkg/db"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"github.com/spf13/cast"
 )
 
 type EduCenterRepositoryInterface interface {
@@ -22,6 +24,7 @@ type EduCenterRepositoryInterface interface {
 	BeginTransaction() (database.Transaction, error)
 	AddContacts(tx database.Transaction, eduCenterID uuid.UUID, contacts models.Contact) (models.Contact, error)
 	UpdateContacts(tx database.Transaction, contacts models.Contact, eduCenterID uuid.UUID) (models.Contact, error)
+	GetEduCenterByLocation(location models.EduCenterWithLocation) ([]models.EduCentersWithLocation, error)
 }
 type EduCenterRepository struct {
 	db *sqlx.DB
@@ -353,4 +356,72 @@ func (r *EduCenterRepository) UpdateContacts(tx database.Transaction, contacts m
 		return models.Contact{}, err
 	}
 	return updatedContacts, nil
+}
+
+func (r *EduCenterRepository) GetEduCenterByLocation(location models.EduCenterWithLocation) ([]models.EduCentersWithLocation, error) {
+	var (
+		query      string
+		eduCenters []models.EduCentersWithLocation
+	)
+	query = `SELECT
+    id,
+    name,
+    html_description,
+    address,
+    location,
+    owner_id,
+    6371 * ACOS(
+        SIN(RADIANS($1)) * SIN(RADIANS(location [0])) + COS(RADIANS($1)) * COS(RADIANS(location [0])) * COS(RADIANS($2 - location [1]))
+    ) AS distance,
+    created_at,
+    updated_at
+FROM
+    edu_centers
+WHERE
+    CASE
+        WHEN $5 <> 0 THEN 
+        6371 * ACOS(
+            SIN(RADIANS($1)) * SIN(RADIANS(location [0])) + COS(RADIANS($1)) * COS(RADIANS(location [0])) * COS(RADIANS($2 - location [1]))
+        ) <= $5 
+        ELSE TRUE 
+    END
+ORDER BY
+    distance
+LIMIT
+    $3 OFFSET $4	
+	`
+
+	rows, err := r.db.Query(query, location.Latitude, location.Longitude, location.Limit, location.Offset, cast.ToString(location.Distance))
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var (
+			updated_at sql.NullTime
+			eduCenter  models.EduCentersWithLocation
+		)
+		err := rows.Scan(
+			&eduCenter.ID,
+			&eduCenter.Name,
+			&eduCenter.HtmlDescription,
+			&eduCenter.Address,
+			&eduCenter.Location,
+			&eduCenter.OwnerID,
+			&eduCenter.Distance,
+			&eduCenter.CreatedAt,
+			&updated_at,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if updated_at.Valid {
+			eduCenter.UpdatedAt = updated_at.Time
+		}
+		eduCenters = append(eduCenters, eduCenter)
+		fmt.Println(eduCenter)
+	}
+
+	return eduCenters, nil
+
 }

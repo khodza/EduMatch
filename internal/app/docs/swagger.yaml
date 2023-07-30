@@ -32,16 +32,14 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.CreateCourseRating:
+  models.CourseRating:
     properties:
       course_id:
         type: string
       score:
         maximum: 5
         minimum: 0
-        type: number
-      user_id:
-        type: string
+        type: integer
     type: object
   models.CustomError:
     properties:
@@ -49,6 +47,13 @@ definitions:
         type: string
       statusCode:
         type: integer
+    type: object
+  models.EduAllCentersWithLocation:
+    properties:
+      educenters:
+        items:
+          $ref: '#/definitions/models.EduCentersWithLocation'
+        type: array
     type: object
   models.EduCenter:
     properties:
@@ -71,6 +76,44 @@ definitions:
       updated_at:
         type: string
     required:
+    - location
+    - name
+    type: object
+  models.EduCenterWithLocation:
+    properties:
+      distance:
+        type: number
+      latitude:
+        type: number
+      limit:
+        type: integer
+      longtitude:
+        type: number
+      offset:
+        type: integer
+    type: object
+  models.EduCentersWithLocation:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      distance:
+        type: number
+      html_description:
+        type: string
+      id:
+        type: string
+      location:
+        $ref: '#/definitions/models.Point'
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - location
     - name
     type: object
   models.Empty:
@@ -289,14 +332,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.CreateCourseRating'
+          $ref: '#/definitions/models.CourseRating'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.CreateCourseRating'
+            $ref: '#/definitions/models.CourseRating'
         "400":
           description: Bad Request
           schema:
@@ -425,6 +468,36 @@ paths:
       security:
       - BearerAuth: []
       summary: Create Edu Center
+      tags:
+      - EduCenter
+  /api/educenters/location:
+    post:
+      consumes:
+      - application/json
+      description: This API for getting educenters by location
+      parameters:
+      - description: EduCenter_Location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EduCenterWithLocation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EduAllCentersWithLocation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.CustomError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.CustomError'
+      summary: Get EduCenter By Location
       tags:
       - EduCenter
   /api/users/:
