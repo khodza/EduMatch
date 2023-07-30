@@ -43,7 +43,7 @@ func NewCourseHandler(courseService services.CourseServiceInterface, logger *zap
 // @Failure 500 {object} models.CustomError
 // @Router /api/courses [POST]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
-	var course models.Course
+	var course models.CreateCourseDto
 	if err := HandleJSONBinding(c, &course, h.logger); err != nil {
 		c.Error(err)
 		return
@@ -73,7 +73,7 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // @Failure 500 {object} models.CustomError
 // @Router /api/courses [PUT]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
-	var newCourse models.Course
+	var newCourse models.UpdateCourseDto
 	if err := HandleJSONBinding(c, &newCourse, h.logger); err != nil {
 		c.Error(err)
 		return
@@ -159,14 +159,14 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 		return
 	}
 
-	if err := h.courseService.DeleteCourse(courseID.String()); err != nil {
+	if err := h.courseService.DeleteCourse(courseID); err != nil {
 		c.Error(err)
 		return
 	}
 
 	LoggingResponse(c, "DeleteCourse", h.logger)
 
-	c.JSON(http.StatusAccepted, "Course deleted")
+	c.JSON(http.StatusAccepted, gin.H{"message": "Course deleted successfully"})
 
 }
 
@@ -192,13 +192,12 @@ func (h *CourseHandler) GiveRating(c *gin.Context) {
 	userID := c.MustGet("user_id").(uuid.UUID)
 	newCourseRating.OwnerID = userID
 
-	rating, err := h.courseService.GiveRating(newCourseRating)
-	if err != nil {
+	if err := h.courseService.GiveRating(newCourseRating); err != nil {
 		c.Error(err)
 		return
 	}
 
 	LoggingResponse(c, "GiveRating", h.logger)
 
-	c.JSON(http.StatusAccepted, rating)
+	c.JSON(http.StatusAccepted, gin.H{"message": "Rating accepted"})
 }

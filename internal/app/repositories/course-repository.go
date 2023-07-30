@@ -12,12 +12,12 @@ import (
 )
 
 type CourseRepositoryInterface interface {
-	GetAllCourses() ([]models.Course, error)
-	CreateCourse(course models.Course) (models.Course, error)
+	GetAllCourses() (models.AllCourses, error)
+	CreateCourse(course models.CreateCourseDto) (models.Course, error)
 	GetCourse(courseID uuid.UUID) (models.Course, error)
-	UpdateCourse(newCourse models.Course) (models.Course, error)
-	DeleteCourse(courseID string) error
-	GiveRating(rating models.CourseRating) (models.CourseRating, error)
+	UpdateCourse(newCourse models.UpdateCourseDto) (models.Course, error)
+	DeleteCourse(courseID uuid.UUID) error
+	GiveRating(rating models.CourseRating) error
 }
 
 type CourseRepository struct {
@@ -30,7 +30,7 @@ func NewCourseRepository(db *sqlx.DB) CourseRepositoryInterface {
 	}
 }
 
-func (r *CourseRepository) CreateCourse(course models.Course) (models.Course, error) {
+func (r *CourseRepository) CreateCourse(course models.CreateCourseDto) (models.Course, error) {
 	var (
 		newCourse models.Course
 		query     = `INSERT INTO courses (name, description, teacher, edu_center_id) VALUES ($1, $2, $3, $4) RETURNING id,name,description,teacher,edu_center_id,created_at`
@@ -46,10 +46,10 @@ func (r *CourseRepository) CreateCourse(course models.Course) (models.Course, er
 
 func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) {
 	var (
-		course    models.Course
-		query     = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at,(SELECT  ROUND(AVG(score),1) AS score FROM ratings WHERE course_id=$1 GROUP BY course_id) AS rating FROM courses WHERE id=$1 AND deleted_at is null`
-		update_at sql.NullTime
-		rating    sql.NullFloat64
+		course models.Course
+		query  = `SELECT c.id,c.name,c.description,c.teacher,c.edu_center_id,c.updated_at,c.created_at, COALESCE(ROUND(AVG(score),1),0) AS rating FROM courses c
+		LEFT JOIN ratings r ON c.id = r.course_id WHERE c.id = $1 AND c.deleted_at IS NULL 
+		GROUP BY c.id, c.name, c.description, c.teacher, c.edu_center_id, c.created_at, c.updated_at`
 	)
 
 	if err := r.db.QueryRow(query, courseID).Scan(
@@ -59,77 +59,77 @@ func (r *CourseRepository) GetCourse(courseID uuid.UUID) (models.Course, error) 
 		&course.Teacher,
 		&course.EduCenterID,
 		&course.CreatedAt,
-		&update_at,
-		&rating,
+		&course.UpdatedAt,
+		&course.Rating,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			err = custom_errors.ErrCourseNotFound
 		}
 		return models.Course{}, err
 	}
-	if update_at.Valid {
-		course.UpdatedAt = update_at.Time
-	}
-	if rating.Valid {
-		course.Rating = rating.Float64
-	}
 
 	return course, nil
 }
 
-func (r *CourseRepository) GetAllCourses() ([]models.Course, error) {
-	var (
-		courses []models.Course
-		query   = `SELECT id,name,description,teacher,edu_center_id,created_at,updated_at,(SELECT  ROUND(AVG(score),1) AS score FROM ratings WHERE course_id=$1 GROUP BY course_id) AS rating FROM courses WHERE deleted_at is null`
-	)
+func (r *CourseRepository) GetAllCourses() (models.AllCourses, error) {
+	var allCourses models.AllCourses
+
+	query := `
+		WITH courses_with_ratings AS (
+			SELECT c.id, c.name, c.description, c.teacher, c.edu_center_id,
+			c.created_at, c.updated_at, COALESCE(ROUND(AVG(r.score), 1), 0) AS rating
+			FROM courses c
+			LEFT JOIN ratings r ON c.id = r.course_id
+			WHERE c.deleted_at IS NULL
+			GROUP BY c.id
+		)
+		SELECT *,COUNT(*) OVER() AS count FROM courses_with_ratings;
+	`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, err
+		return models.AllCourses{}, err
 	}
+
+	defer rows.Close()
+
 	for rows.Next() {
-		var (
-			updated_at sql.NullTime
-			course     models.Course
-			rating     sql.NullFloat64
-		)
-		err := rows.Scan(
+		var course models.Course
+		scanErr := rows.Scan(
 			&course.ID,
 			&course.Name,
 			&course.Description,
 			&course.Teacher,
 			&course.EduCenterID,
 			&course.CreatedAt,
-			&updated_at,
-			&rating,
+			&course.UpdatedAt,
+			&course.Rating,
+			&allCourses.Count,
 		)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return models.AllCourses{}, scanErr
 		}
 
-		if updated_at.Valid {
-			course.UpdatedAt = updated_at.Time
-		}
-		if rating.Valid {
-			course.Rating = rating.Float64
-		}
-
-		courses = append(courses, course)
+		allCourses.Courses = append(allCourses.Courses, course)
 	}
 
-	return courses, nil
+	err = rows.Err()
+	if err != nil {
+		return models.AllCourses{}, err
+	}
+
+	return allCourses, nil
 }
 
-func (r *CourseRepository) UpdateCourse(course models.Course) (models.Course, error) {
+func (r *CourseRepository) UpdateCourse(course models.UpdateCourseDto) (models.Course, error) {
+	course.UpdatedAt = time.Now().UTC()
 	var (
-		query = `UPDATE courses SET name=$2,description=$3,teacher=$4,edu_center_id=$5,updated_at=$6 WHERE id=$1`
+		updatedCourse models.Course
+		query         = `UPDATE courses SET name=$2,description=$3,teacher=$4,edu_center_id=$5,updated_at=$6 WHERE id=$1 AND deleted_at IS NULL RETURNING id, name, description, teacher, edu_center_id,(SELECT COALESCE(ROUND(AVG(score),1),0) FROM ratings WHERE course_id =$1) AS rating,created_at,updated_at`
 	)
-
-	_, err := r.db.Exec(query, course.ID, course.Name, course.Description, course.Teacher, course.EduCenterID, time.Now().UTC())
-	if err != nil {
-		pqErr, _ := err.(*pq.Error)
-		if pqErr.Code == "23505" {
-			err = custom_errors.ErrCourseExists
+	if err := r.db.Get(&updatedCourse, query, course.ID, course.Name, course.Description, course.Teacher, course.EduCenterID, course.UpdatedAt); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return models.Course{}, custom_errors.ErrCourseExists
 		}
 
 		if err == sql.ErrNoRows {
@@ -138,11 +138,10 @@ func (r *CourseRepository) UpdateCourse(course models.Course) (models.Course, er
 		return models.Course{}, err
 	}
 
-	return course, nil
+	return updatedCourse, nil
 }
 
-func (r *CourseRepository) DeleteCourse(courseID string) error {
-
+func (r *CourseRepository) DeleteCourse(courseID uuid.UUID) error {
 	_, err := r.db.Exec(`UPDATE courses SET deleted_at=$2 WHERE id=$1`, courseID, time.Now().UTC())
 	if err != nil {
 		return err
@@ -151,17 +150,15 @@ func (r *CourseRepository) DeleteCourse(courseID string) error {
 	return nil
 }
 
-func (r *CourseRepository) GiveRating(rating models.CourseRating) (models.CourseRating, error) {
+func (r *CourseRepository) GiveRating(rating models.CourseRating) error {
 	var (
-		query     = `INSERT INTO ratings (score, owner_id, course_id) VALUES ($1,$2,$3) RETURNING score,user_id,course_id`
-		newRating models.CourseRating
+		query = `INSERT INTO ratings (score, owner_id, course_id) VALUES ($1,$2,$3) RETURNING score,owner_id,course_id`
 	)
 
-	err := r.db.Get(&newRating, query, rating.Score, rating.OwnerID, rating.CourseID)
+	_, err := r.db.Exec(query, rating.Score, rating.OwnerID, rating.CourseID)
 	if err != nil {
-		return models.CourseRating{}, err
+		return err
 	}
 
-	return newRating, nil
-
+	return nil
 }

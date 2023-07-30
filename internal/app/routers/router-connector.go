@@ -29,20 +29,20 @@ func ConnectRoutersToHandlers(router *gin.Engine, h dependencies.Handlers) {
 	api.DELETE("users/:id", h.AuthHandler.ProtectedEndpoint(), h.UserHandler.DeleteUser)
 
 	//eduCenters
-	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
-	api.GET("/educenters/", h.EduCenterHandler.GetEduCenters)
-	api.POST("/educenters/rating", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GiveRating)
+	api.GET("/educenters/", h.EduCenterHandler.GetAllEduCenters)
 	api.GET("/educenters/:id", h.EduCenterHandler.GetEduCenter)
+	api.POST("/educenters/", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.CreateEduCenter)
+	api.POST("/educenters/rating", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.GiveRating)
 	api.PATCH("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.UpdateEduCenter)
 	api.DELETE("/educenters/:id", h.AuthHandler.ProtectedEndpoint(), h.EduCenterHandler.DeleteEduCenter)
 
 	//courses
-	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)
-	api.GET("/courses/:id", h.CourseHandler.GetCourse)
 	api.GET("/courses/", h.CourseHandler.GetAllCourses)
-	api.PUT("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
-	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
+	api.GET("/courses/:id", h.CourseHandler.GetCourse)
+	api.POST("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.CreateCourse)
 	api.POST("/courses/rating", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.GiveRating)
+	api.PATCH("/courses/", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.UpdateCourse)
+	api.DELETE("/courses/:id", h.AuthHandler.ProtectedEndpoint(), h.CourseHandler.DeleteCourse)
 
 	url := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))

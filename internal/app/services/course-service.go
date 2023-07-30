@@ -8,12 +8,12 @@ import (
 )
 
 type CourseServiceInterface interface {
-	CreateCourse(course models.Course) (models.Course, error)
-	UpdateCourse(newCourse models.Course) (models.Course, error)
+	CreateCourse(course models.CreateCourseDto) (models.Course, error)
+	UpdateCourse(newCourse models.UpdateCourseDto) (models.Course, error)
 	GetCourse(id uuid.UUID) (models.Course, error)
 	GetAllCourses() (models.AllCourses, error)
-	DeleteCourse(id string) error
-	GiveRating(rating models.CourseRating) (models.CourseRating, error)
+	DeleteCourse(id uuid.UUID) error
+	GiveRating(rating models.CourseRating) error
 }
 
 type CourseService struct {
@@ -26,7 +26,7 @@ func NewCourseService(courseRepasitory repositories.CourseRepositoryInterface) C
 	}
 }
 
-func (s *CourseService) CreateCourse(course models.Course) (models.Course, error) {
+func (s *CourseService) CreateCourse(course models.CreateCourseDto) (models.Course, error) {
 	newCourse, err := s.courseRepository.CreateCourse(course)
 	if err != nil {
 		return models.Course{}, err
@@ -34,7 +34,7 @@ func (s *CourseService) CreateCourse(course models.Course) (models.Course, error
 	return newCourse, nil
 }
 
-func (s *CourseService) UpdateCourse(newCourse models.Course) (models.Course, error) {
+func (s *CourseService) UpdateCourse(newCourse models.UpdateCourseDto) (models.Course, error) {
 	course, err := s.courseRepository.UpdateCourse(newCourse)
 	if err != nil {
 		return models.Course{}, err
@@ -55,23 +55,20 @@ func (s *CourseService) GetAllCourses() (models.AllCourses, error) {
 	if err != nil {
 		return models.AllCourses{}, err
 	}
-	return models.AllCourses{
-		Courses: courses,
-	}, nil
+	return courses, nil
 }
 
-func (s *CourseService) DeleteCourse(id string) error {
+func (s *CourseService) DeleteCourse(id uuid.UUID) error {
 	if err := s.courseRepository.DeleteCourse(id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *CourseService) GiveRating(rating models.CourseRating) (models.CourseRating, error) {
-	courseRating, err := s.courseRepository.GiveRating(rating)
-	if err != nil {
-		return models.CourseRating{}, err
+func (s *CourseService) GiveRating(rating models.CourseRating) error {
+	if err := s.courseRepository.GiveRating(rating); err != nil {
+		return err
 	}
 
-	return courseRating, nil
+	return nil
 }

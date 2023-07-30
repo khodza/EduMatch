@@ -11,7 +11,11 @@ type Point struct {
 	Longitude float64 `json:"longitude"`
 }
 
-// this is Scan method to retrieve location with correct type
+// // Implement the `Value` method to convert Point to the PostgreSQL POINT type
+// func (p Point) Value() (driver.Value, error) {
+// 	return fmt.Sprintf("(%f,%f)", p.Latitude, p.Longitude), nil
+// }
+
 func (p *Point) Scan(value interface{}) error {
 	// Check if the value is nil and return early
 	if value == nil {

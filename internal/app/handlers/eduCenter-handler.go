@@ -11,7 +11,7 @@ import (
 )
 
 type EduCenterHandlerInterface interface {
-	GetEduCenters(c *gin.Context)
+	GetAllEduCenters(c *gin.Context)
 	CreateEduCenter(c *gin.Context)
 	GetEduCenter(c *gin.Context)
 	UpdateEduCenter(c *gin.Context)
@@ -40,8 +40,8 @@ func NewEduCenterHandler(eduCenterService services.EduCenterServiceInterface, lo
 // @Failure 400 {object} models.CustomError
 // @Failure 500 {object} models.CustomError
 // @Router /api/educenters [GET]
-func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
-	eduCenters, err := h.eduCenterService.GetEduCenters()
+func (h *EduCenterHandler) GetAllEduCenters(c *gin.Context) {
+	eduCenters, err := h.eduCenterService.GetAllEduCenters()
 
 	if err != nil {
 		c.Error(err)
@@ -49,7 +49,7 @@ func (h *EduCenterHandler) GetEduCenters(c *gin.Context) {
 	}
 
 	//logging
-	LoggingResponse(c, "GetEduCenters", h.logger)
+	LoggingResponse(c, "GetAllEduCenters", h.logger)
 
 	c.JSON(http.StatusOK, eduCenters)
 }
