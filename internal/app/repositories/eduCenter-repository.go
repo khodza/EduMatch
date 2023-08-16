@@ -24,7 +24,7 @@ type EduCenterRepositoryInterface interface {
 	BeginTransaction() (database.Transaction, error)
 	AddContacts(tx database.Transaction, eduCenterID uuid.UUID, contacts models.Contact) (models.Contact, error)
 	UpdateContacts(tx database.Transaction, contacts models.Contact, eduCenterID uuid.UUID) (models.Contact, error)
-	GetEduCenterByLocation(location models.EduCenterWithLocation) ([]models.EduCentersWithLocation, error)
+	GetEduCenterByLocation(location models.NearEduCenterDto) ([]models.NearEduCenter, error)
 }
 type EduCenterRepository struct {
 	db *sqlx.DB
@@ -358,10 +358,10 @@ func (r *EduCenterRepository) UpdateContacts(tx database.Transaction, contacts m
 	return updatedContacts, nil
 }
 
-func (r *EduCenterRepository) GetEduCenterByLocation(location models.EduCenterWithLocation) ([]models.EduCentersWithLocation, error) {
+func (r *EduCenterRepository) GetEduCenterByLocation(location models.NearEduCenterDto) ([]models.NearEduCenter, error) {
 	var (
 		query      string
-		eduCenters []models.EduCentersWithLocation
+		eduCenters []models.NearEduCenter
 	)
 	query = `SELECT
     id,
@@ -399,7 +399,7 @@ LIMIT
 	for rows.Next() {
 		var (
 			updated_at sql.NullTime
-			eduCenter  models.EduCentersWithLocation
+			eduCenter  models.NearEduCenter
 		)
 		err := rows.Scan(
 			&eduCenter.ID,

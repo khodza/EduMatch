@@ -474,7 +474,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.EduCenterWithLocation"
+                            "$ref": "#/definitions/models.NearEduCenterDto"
                         }
                     }
                 ],
@@ -482,7 +482,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.EduAllCentersWithLocation"
+                            "$ref": "#/definitions/models.AllNearEduCenters"
                         }
                     },
                     "400": {
@@ -867,13 +867,13 @@
                 }
             }
         },
-        "models.EduAllCentersWithLocation": {
+        "models.AllNearEduCenters": {
             "type": "object",
             "properties": {
                 "educenters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.EduCentersWithLocation"
+                        "$ref": "#/definitions/models.NearEduCenter"
                     }
                 }
             }
@@ -914,7 +914,7 @@
                 }
             }
         },
-        "models.EduCenterWithLocation": {
+        "models.NearEduCenterDto": {
             "type": "object",
             "properties": {
                 "distance": {
@@ -934,7 +934,7 @@
                 }
             }
         },
-        "models.EduCentersWithLocation": {
+        "models.NearEduCenter": {
             "type": "object",
             "required": [
                 "location",

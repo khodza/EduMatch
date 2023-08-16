@@ -64,15 +64,15 @@ type EduCenterRating struct {
 	EduCenterID uuid.UUID `json:"edu_center_id" db:"edu_center_id"`
 }
 
-type EduCenterWithLocation struct {
+type NearEduCenterDto struct {
 	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longtitude"`
+	Longitude float64 `json:"longitude"`
 	Distance  float64 `json:"distance"`
 	Limit     int     `json:"limit"`
 	Offset    int     `json:"offset"`
 }
 
-type EduCentersWithLocation struct {
+type NearEduCenter struct {
 	ID              uuid.UUID `json:"id" db:"id"`
 	Name            string    `json:"name" db:"name" validate:"required"`
 	HtmlDescription string    `json:"html_description" db:"html_description"`
@@ -84,6 +84,7 @@ type EduCentersWithLocation struct {
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }
 
-type EduAllCentersWithLocation struct {
-	EduCenters []EduCentersWithLocation `json:"educenters"`
+type AllNearEduCenters struct {
+	Count      int             `json:"count"`
+	EduCenters []NearEduCenter `json:"educenters"`
 }

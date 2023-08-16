@@ -15,7 +15,7 @@ type EduCenterServiceInterface interface {
 	UpdateEduCenter(eduCenter models.UpdateEduCenterDto) (models.EduCenter, error)
 	DeleteEduCenter(eduCenterID uuid.UUID) error
 	GiveRating(rating models.EduCenterRating) error
-	GetEduCenterByLocation(location models.EduCenterWithLocation) (models.EduAllCentersWithLocation, error)
+	GetEduCenterByLocation(location models.NearEduCenterDto) (models.AllNearEduCenters, error)
 }
 type EduCenterService struct {
 	eduCenterRepository repositories.EduCenterRepositoryInterface
@@ -156,12 +156,12 @@ func (s *EduCenterService) GiveRating(rating models.EduCenterRating) error {
 	return nil
 }
 
-func (s *EduCenterService) GetEduCenterByLocation(location models.EduCenterWithLocation) (models.EduAllCentersWithLocation, error) {
+func (s *EduCenterService) GetEduCenterByLocation(location models.NearEduCenterDto) (models.AllNearEduCenters, error) {
 	eduCenters, err := s.eduCenterRepository.GetEduCenterByLocation(location)
 	if err != nil {
-		return models.EduAllCentersWithLocation{}, nil
+		return models.AllNearEduCenters{}, nil
 	}
-	return models.EduAllCentersWithLocation{
+	return models.AllNearEduCenters{
 		EduCenters: eduCenters,
 	}, nil
 }

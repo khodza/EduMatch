@@ -122,16 +122,18 @@ func (h *EduCenterHandler) GetEduCenter(c *gin.Context) {
 
 //		Update EduCenter ...
 //	 @Summary Update EduCenter
-//	@Description This API for updating eduCenter
-//	 @Security BearerAuth
-//	 @Tags EduCenter
-//	 @Accept json
-//	 @Produse json
-//	 @Param body body models.EduCenter true "EduCenter"
-//	 @Success 200 {object} models.EduCenter
-//	 @Failure 400 {object} models.CustomError
-//	 @Failure 500 {object} models.CustomError
-//	 @Router /api/educenters [PATCH]
+//
+// @Description This API for updating eduCenter
+//
+//	@Security BearerAuth
+//	@Tags EduCenter
+//	@Accept json
+//	@Produse json
+//	@Param body body models.EduCenter true "EduCenter"
+//	@Success 200 {object} models.EduCenter
+//	@Failure 400 {object} models.CustomError
+//	@Failure 500 {object} models.CustomError
+//	@Router /api/educenters [PATCH]
 func (h *EduCenterHandler) UpdateEduCenter(c *gin.Context) {
 	var eduCenter models.UpdateEduCenterDto
 	if err := HandleFormDataBinding(c, &eduCenter, h.logger); err != nil {
@@ -207,22 +209,22 @@ func (h *EduCenterHandler) GiveRating(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Rating accepted"})
 }
 
-// GetEduCenterByLocation(location models.EduCenterWithLocation) (models.EduAllCentersWithLocation, error)
+// GetEduCenterByLocation(location models.NearEduCenterDto) (models.AllNearEduCenters, error)
 // Get EduCenter By Location
 // @Summary Get EduCenter By Location
 // @Description This API for getting educenters by location
 // @Tags EduCenter
 // @Accept json
 // @Produce json
-// @Param body body models.EduCenterWithLocation true "EduCenter_Location"
-// @Success 200 {object} models.EduAllCentersWithLocation
+// @Param body body models.NearEduCenterDto true "EduCenter_Location"
+// @Success 200 {object} models.AllNearEduCenters
 // @Failure 400 {object} models.CustomError
 // @Failure 500 {object} models.CustomError
 // @Router /api/educenters/location [POST]
 func (h *EduCenterHandler) GetEduCenterByLocation(c *gin.Context) {
-	var location models.EduCenterWithLocation
+	var location models.NearEduCenterDto
 
-	err := HandleFormDataBinding(c, &location, h.logger)
+	err := HandleJSONBinding(c, &location, h.logger)
 	if err != nil {
 		c.Error(err)
 		return

@@ -486,7 +486,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.EduCenterWithLocation"
+                            "$ref": "#/definitions/models.NearEduCenterDto"
                         }
                     }
                 ],
@@ -494,7 +494,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.EduAllCentersWithLocation"
+                            "$ref": "#/definitions/models.AllNearEduCenters"
                         }
                     },
                     "400": {
@@ -879,13 +879,13 @@ const docTemplate = `{
                 }
             }
         },
-        "models.EduAllCentersWithLocation": {
+        "models.AllNearEduCenters": {
             "type": "object",
             "properties": {
                 "educenters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.EduCentersWithLocation"
+                        "$ref": "#/definitions/models.NearEduCenter"
                     }
                 }
             }
@@ -926,7 +926,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.EduCenterWithLocation": {
+        "models.NearEduCenterDto": {
             "type": "object",
             "properties": {
                 "distance": {
@@ -946,7 +946,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.EduCentersWithLocation": {
+        "models.NearEduCenter": {
             "type": "object",
             "required": [
                 "location",
